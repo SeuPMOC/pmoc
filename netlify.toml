@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# As rotas de PDF (/api/pmoc, /api/clientes/.../planilha) usam react-pdf + pdf-lib
+# e já declaram `export const runtime = "nodejs"` — rodam como Netlify Functions Node.
