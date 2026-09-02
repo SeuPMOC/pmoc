@@ -27,8 +27,8 @@ Portaria MS 3.523/1998, ABNT NBR 13971, RE ANVISA 09/2003).
 ## Deploy no Netlify
 
 1. Push do repo pro GitHub, "Add new site" → importa o repo.
-2. Base directory: `pmoc-app` · Build: `npm run build` (o `netlify.toml` já define isso
-   e o plugin Next).
+2. O repositório é a pasta `pmoc-app` (é onde está o `.git`). Base directory em
+   branco. Build: `npm run build` (o `netlify.toml` já define isso e o plugin Next).
 3. Site settings → Environment variables: `NEXT_PUBLIC_SUPABASE_URL`,
    `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
 4. No Supabase → Authentication → URL Configuration: adicione a URL do site do
