@@ -26,3 +26,20 @@ export async function requireClient() {
   if (profile.role !== "client" || !profile.client_id) redirect("/dashboard");
   return { supabase, user, profile, clientId: profile.client_id as string };
 }
+
+// Você, dono do SeuPMOC — não um cliente da plataforma. Allowlist por e-mail
+// via env, checado no servidor. ponytail: um usuário só; virar tabela de
+// papéis se um dia mais gente da sua equipe precisar do /admin.
+export function isPlatformAdmin(email: string | null | undefined) {
+  const admins = (process.env.PLATFORM_ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  return !!email && admins.includes(email.toLowerCase());
+}
+
+export async function requirePlatformAdmin() {
+  const { user } = await requireUser();
+  if (!isPlatformAdmin(user.email)) redirect("/dashboard");
+  return { user };
+}

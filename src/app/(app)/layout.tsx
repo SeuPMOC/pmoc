@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
+import { isPlatformAdmin } from "@/lib/supabase/auth";
 
 export default async function AppLayout({
   children,
@@ -25,6 +26,7 @@ export default async function AppLayout({
     ["Clientes", "/clientes"],
     ["Cobrança", "/cobranca"],
     ["Minha empresa", "/empresa"],
+    ...(isPlatformAdmin(user.email) ? [["Painel admin", "/admin"]] : []),
   ];
 
   return (

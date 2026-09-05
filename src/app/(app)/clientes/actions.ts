@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser, isStaff } from "@/lib/supabase/auth";
+import { checarLimiteClientes } from "@/lib/pmoc/limites";
 
 const num = (v: FormDataEntryValue | null) =>
   v === null || v === "" ? null : Number(v);
@@ -32,6 +33,7 @@ function payload(f: FormData) {
 export async function criarCliente(f: FormData) {
   const { supabase, profile } = await requireUser();
   if (!isStaff(profile.role)) throw new Error("Sem permissão");
+  await checarLimiteClientes(supabase, profile.org_id);
 
   const { data, error } = await supabase
     .from("clients")

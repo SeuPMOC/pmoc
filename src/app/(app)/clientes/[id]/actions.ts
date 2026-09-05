@@ -7,6 +7,7 @@ import { planoPadraoParaTipo } from "@/lib/pmoc/catalogo";
 import { emitirPmoc } from "@/lib/pmoc/emitir";
 import { mesesPrevistos } from "@/lib/pmoc/cronograma";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { checarLimiteEquipamentos } from "@/lib/pmoc/limites";
 
 const str = (v: FormDataEntryValue | null) =>
   v === null || v === "" ? null : String(v);
@@ -44,7 +45,8 @@ export async function excluirUnidade(clientId: string, unitId: string) {
 
 // ---------- Equipamentos ----------
 export async function criarEquipamento(clientId: string, f: FormData) {
-  const { supabase } = await staff();
+  const { supabase, profile } = await staff();
+  await checarLimiteEquipamentos(supabase, profile.org_id);
   const tipo = String(f.get("tipo"));
   const { data: equip, error } = await supabase
     .from("equipment")

@@ -17,11 +17,11 @@ Portaria MS 3.523/1998, ABNT NBR 13971, RE ANVISA 09/2003).
 2. Em **SQL Editor**, rode `supabase/migrations/0001_init.sql`.
 3. Em **Authentication > Providers**, deixe *Email* habilitado. Para testes,
    desligue *Confirm email*.
-4. Rode também `0002_client_portal.sql`, `0003_equipment_types.sql` e
-   `0004_art.sql` (cria o bucket de storage `art`).
-5. `cp .env.example .env.local` e preencha as 3 chaves (Settings > API):
-   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` e
-   `SUPABASE_SERVICE_ROLE_KEY` (esta última só server-side, cria os logins do portal).
+4. Rode também `0002_client_portal.sql`, `0003_equipment_types.sql`,
+   `0004_art.sql` (cria o bucket de storage `art`) e `0005_billing_admin.sql`.
+5. `cp .env.example .env.local` e preencha: `NEXT_PUBLIC_SUPABASE_URL`,
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server-side) e
+   `PLATFORM_ADMIN_EMAILS` (seu e-mail, pra acessar `/admin`).
 6. `npm install && npm run dev` → http://localhost:3000
 
 ## Deploy no Netlify
@@ -125,6 +125,34 @@ conta desse usuário (precisa existir — cadastre em `/login`) com 1 responsáv
 técnico + 5 estabelecimentos completos (ambientes, equipamentos de vários tipos
 incl. chiller/torre/bomba/QGBT/gerador, planos automáticos, OS passadas e
 futuras, e 2 PMOCs com ART). Usa `SUPABASE_SERVICE_ROLE_KEY` do `.env.local`.
+
+### Sua área de admin (`/admin`)
+
+Separada da área dos seus clientes (as empresas de climatização). Acesso: seu
+e-mail precisa estar em `PLATFORM_ADMIN_EMAILS` (`.env.local`) — aí um item
+"Painel admin" aparece na navegação depois do login normal.
+
+- `/admin` — lista todos os assinantes (organizations): plano, situação da
+  assinatura, uso (clientes/equipamentos vs. limite do plano), próxima mensalidade.
+- `/admin/[orgId]` — trocar plano/situação, uso detalhado, histórico de
+  mensalidades com "marcar pago"/"marcar atrasado" e registrar uma nova.
+- Planos e preços: `src/lib/admin/planos.ts` (fonte única).
+- Limite por plano é aplicado de verdade: `src/lib/pmoc/limites.ts` barra
+  criar cliente/equipamento além do limite (mensagem pede upgrade).
+- `subscription_payments` e as colunas de billing de `organizations` não têm
+  policy de RLS pro usuário comum — só o service role (`supabaseAdmin()`) lê/escreve;
+  um trigger (`0005_billing_admin.sql`) também impede o dono da empresa de mudar
+  seu próprio plano chamando a API do Supabase direto.
+- **Cobrança das mensalidades hoje é manual** (você registra e marca pago). Automatizar
+  com um gateway (Asaas/Stripe) é o próximo passo óbvio — a tela `/admin/[orgId]`
+  não muda, só o que preenche `subscription_payments` passa a ser um webhook.
+
+### Login
+
+- Criar conta / entrar / **esqueci minha senha** (`resetPasswordForEmail` →
+  `/reset-senha`). Precisa de SMTP configurado no Supabase (Authentication →
+  Email Templates) pra o e-mail realmente sair — sem isso funciona local com o
+  link aparecendo nos logs do Supabase.
 
 ## Roadmap
 

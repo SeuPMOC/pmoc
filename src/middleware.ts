@@ -31,6 +31,8 @@ export async function middleware(req: NextRequest) {
     req.nextUrl.pathname.startsWith("/clientes") ||
     req.nextUrl.pathname.startsWith("/pmoc") ||
     req.nextUrl.pathname.startsWith("/cobranca") ||
+    req.nextUrl.pathname.startsWith("/empresa") ||
+    req.nextUrl.pathname.startsWith("/admin") ||
     req.nextUrl.pathname.startsWith("/portal");
 
   if (!user && isProtected) {
