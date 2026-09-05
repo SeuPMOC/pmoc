@@ -1,13 +1,21 @@
 import { requireUser } from "@/lib/supabase/auth";
 import { PageHeader, Panel, Field, Submit } from "@/components/ui";
-import { salvarEmpresa, criarTecnico, excluirTecnico } from "./actions";
+import {
+  salvarEmpresa,
+  criarTecnico,
+  excluirTecnico,
+  criarFuncionario,
+  alternarFuncionarioAtivo,
+  excluirFuncionario,
+} from "./actions";
 
 export default async function EmpresaPage() {
   const { supabase, profile } = await requireUser();
 
-  const [{ data: org }, { data: tecnicos }] = await Promise.all([
+  const [{ data: org }, { data: tecnicos }, { data: funcionarios }] = await Promise.all([
     supabase.from("organizations").select("*").eq("id", profile.org_id).single(),
     supabase.from("technicians").select("*").eq("org_id", profile.org_id).order("nome"),
+    supabase.from("employees").select("*").eq("org_id", profile.org_id).order("nome"),
   ]);
 
   return (
@@ -26,7 +34,7 @@ export default async function EmpresaPage() {
 
       <Panel title="Responsáveis técnicos">
         <p className="mb-3 text-sm text-neutral-500">
-          Usados na emissão do PMOC e da planilha de acompanhamento.
+          Usados na emissão do PMOC e da planilha de acompanhamento (assinam pela ART).
         </p>
         <ul className="mb-4 divide-y text-sm">
           {(tecnicos ?? []).map((t) => (
@@ -51,6 +59,44 @@ export default async function EmpresaPage() {
           <Field label="Nº registro" name="numero_registro" />
           <Field label="ART/TRT nº" name="art_numero" />
           <div className="md:col-span-3"><Submit>Adicionar responsável</Submit></div>
+        </form>
+      </Panel>
+
+      <Panel title="Funcionários / equipe de campo">
+        <p className="mb-3 text-sm text-neutral-500">
+          Quem sai a campo executando a manutenção. Aparecem no "Registrar execução"
+          de cada cliente, pra apontar quem fez cada serviço.
+        </p>
+        <ul className="mb-4 divide-y text-sm">
+          {(funcionarios ?? []).map((e) => (
+            <li key={e.id} className="flex items-center justify-between py-2">
+              <span className={e.ativo ? "" : "text-neutral-400 line-through"}>
+                <b>{e.nome}</b>
+                {e.cargo ? ` · ${e.cargo}` : ""}
+                {e.telefone ? ` · ${e.telefone}` : ""}
+              </span>
+              <span className="flex gap-3 text-xs">
+                <form action={alternarFuncionarioAtivo.bind(null, e.id, !e.ativo)}>
+                  <button className="text-blue-600 hover:underline">
+                    {e.ativo ? "desativar" : "reativar"}
+                  </button>
+                </form>
+                <form action={excluirFuncionario.bind(null, e.id)}>
+                  <button className="text-red-600 hover:underline">excluir</button>
+                </form>
+              </span>
+            </li>
+          ))}
+          {!funcionarios?.length && (
+            <li className="py-2 text-neutral-500">Nenhum funcionário cadastrado.</li>
+          )}
+        </ul>
+        <form action={criarFuncionario} className="grid gap-3 md:grid-cols-4">
+          <Field label="Nome" name="nome" required />
+          <Field label="Cargo / função" name="cargo" placeholder="Técnico de refrigeração" />
+          <Field label="Telefone" name="telefone" />
+          <Field label="E-mail" name="email" />
+          <div className="md:col-span-4"><Submit>Adicionar funcionário</Submit></div>
         </form>
       </Panel>
     </div>

@@ -18,7 +18,8 @@ Portaria MS 3.523/1998, ABNT NBR 13971, RE ANVISA 09/2003).
 3. Em **Authentication > Providers**, deixe *Email* habilitado. Para testes,
    desligue *Confirm email*.
 4. Rode também `0002_client_portal.sql`, `0003_equipment_types.sql`,
-   `0004_art.sql` (cria o bucket de storage `art`) e `0005_billing_admin.sql`.
+   `0004_art.sql` (cria o bucket de storage `art`), `0005_billing_admin.sql`
+   e `0006_funcionarios.sql`.
 5. `cp .env.example .env.local` e preencha: `NEXT_PUBLIC_SUPABASE_URL`,
    `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server-side) e
    `PLATFORM_ADMIN_EMAILS` (seu e-mail, pra acessar `/admin`).
@@ -146,6 +147,16 @@ e-mail precisa estar em `PLATFORM_ADMIN_EMAILS` (`.env.local`) — aí um item
 - **Cobrança das mensalidades hoje é manual** (você registra e marca pago). Automatizar
   com um gateway (Asaas/Stripe) é o próximo passo óbvio — a tela `/admin/[orgId]`
   não muda, só o que preenche `subscription_payments` passa a ser um webhook.
+
+### Funcionários (equipe de campo)
+
+`0006_funcionarios.sql` — tabela `employees`, distinta de `technicians`
+(responsável técnico = CREA/CFT, assina o PMOC/ART; funcionário = quem sai a
+campo). Cadastro em **Minha empresa** → "Funcionários" (nome, cargo, contato,
+ativo/inativo). `maintenance_orders.employee_id` aponta pra quem executou —
+o formulário "Registrar execução" (`/clientes/[id]/acompanhamento`) usa isso em
+vez de responsável técnico. O nome do funcionário aparece no registro de
+execuções do PMOC emitido.
 
 ### Login
 

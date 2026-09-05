@@ -32,7 +32,7 @@ export async function emitirPmoc(opts: {
         .eq("client_id", opts.clientId),
       supabase
         .from("maintenance_orders")
-        .select("*, equipment(tag), technicians(nome)")
+        .select("*, equipment(tag), employees(nome)")
         .eq("client_id", opts.clientId)
         .gte("data_execucao", opts.periodoInicio)
         .lte("data_execucao", opts.periodoFim)
@@ -101,7 +101,7 @@ export async function emitirPmoc(opts: {
       data: br(x.data_execucao),
       equipamentoTag: x.equipment?.tag ?? undefined,
       tipo: x.tipo,
-      responsavel: x.technicians?.nome ?? undefined,
+      responsavel: x.employees?.nome ?? undefined,
       descricao: x.descricao_servico ?? undefined,
       ocorrencias: x.ocorrencias ?? undefined,
     })),

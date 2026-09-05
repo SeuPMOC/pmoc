@@ -58,6 +58,15 @@ const { data: tec } = await db
   .select("id")
   .single();
 
+// ---- funcionários (equipe de campo) ----
+const { data: func } = await db
+  .from("employees")
+  .insert([
+    { org_id: orgId, nome: "Carlos Souza", cargo: "Técnico de refrigeração" },
+    { org_id: orgId, nome: "Deivid Ramos", cargo: "Auxiliar técnico" },
+  ])
+  .select("id");
+
 // ---- estabelecimentos ----
 const ESTABS = [
   {
@@ -236,7 +245,7 @@ for (const e of ESTABS) {
         const d = new Date(hoje.getFullYear(), hoje.getMonth() + m, 5);
         await db.from("maintenance_orders").insert({
           org_id: orgId, client_id: client.id, equipment_id: eq.id,
-          plan_item_id: itens[0].id, technician_id: tec.id,
+          plan_item_id: itens[0].id, employee_id: func[Math.abs(m) % func.length]?.id,
           tipo: "preventiva",
           status: m < 0 ? "concluida" : "agendada",
           data_prevista: iso(d),

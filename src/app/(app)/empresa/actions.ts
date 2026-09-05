@@ -47,3 +47,34 @@ export async function excluirTecnico(techId: string) {
   if (error) throw error;
   revalidatePath("/empresa");
 }
+
+// ---------- Funcionários (equipe de campo) ----------
+export async function criarFuncionario(f: FormData) {
+  const { supabase, profile } = await staff();
+  const { error } = await supabase.from("employees").insert({
+    org_id: profile.org_id,
+    nome: String(f.get("nome")),
+    cargo: str(f.get("cargo")),
+    telefone: str(f.get("telefone")),
+    email: str(f.get("email")),
+  });
+  if (error) throw error;
+  revalidatePath("/empresa");
+}
+
+export async function alternarFuncionarioAtivo(employeeId: string, ativo: boolean) {
+  const { supabase } = await staff();
+  const { error } = await supabase
+    .from("employees")
+    .update({ ativo })
+    .eq("id", employeeId);
+  if (error) throw error;
+  revalidatePath("/empresa");
+}
+
+export async function excluirFuncionario(employeeId: string) {
+  const { supabase } = await staff();
+  const { error } = await supabase.from("employees").delete().eq("id", employeeId);
+  if (error) throw error;
+  revalidatePath("/empresa");
+}

@@ -24,14 +24,19 @@ export default async function AcompanhamentoPage({
     .single();
   if (!c) notFound();
 
-  const [{ data: units }, { data: equip }, { data: tecnicos }, { data: execucoes }, { data: laudos }] =
+  const [{ data: units }, { data: equip }, { data: funcionarios }, { data: execucoes }, { data: laudos }] =
     await Promise.all([
       supabase.from("units").select("id, nome").eq("client_id", id).order("nome"),
       supabase.from("equipment").select("id, tag").eq("client_id", id).order("tag"),
-      supabase.from("technicians").select("id, nome").eq("org_id", profile.org_id).order("nome"),
+      supabase
+        .from("employees")
+        .select("id, nome")
+        .eq("org_id", profile.org_id)
+        .eq("ativo", true)
+        .order("nome"),
       supabase
         .from("maintenance_orders")
-        .select("*, equipment(tag)")
+        .select("*, equipment(tag), employees(nome)")
         .eq("client_id", id)
         .order("data_execucao", { ascending: false })
         .limit(30),
@@ -51,9 +56,9 @@ export default async function AcompanhamentoPage({
     { value: "", label: "— geral —" },
     ...(equip ?? []).map((e) => ({ value: e.id, label: e.tag })),
   ];
-  const tecOpts = [
-    { value: "", label: "— nenhum —" },
-    ...(tecnicos ?? []).map((t) => ({ value: t.id, label: t.nome })),
+  const funcOpts = [
+    { value: "", label: "— não informado —" },
+    ...(funcionarios ?? []).map((f) => ({ value: f.id, label: f.nome })),
   ];
 
   return (
@@ -64,7 +69,7 @@ export default async function AcompanhamentoPage({
       <Panel title="Registrar execução">
         <form action={registrarExecucao.bind(null, id)} className="grid gap-3 md:grid-cols-3">
           <Field label="Equipamento" name="equipment_id" as="select" options={equipOpts} />
-          <Field label="Responsável" name="technician_id" as="select" options={tecOpts} />
+          <Field label="Funcionário" name="employee_id" as="select" options={funcOpts} />
           <Field label="Tipo" name="tipo" as="select" options={OS_TIPOS} />
           <Field label="Data prevista" name="data_prevista" type="date" />
           <Field label="Data execução" name="data_execucao" type="date" required />
@@ -78,7 +83,12 @@ export default async function AcompanhamentoPage({
           {(execucoes ?? []).map((x) => (
             <li key={x.id} className="py-2">
               {x.data_execucao ?? "s/ data"} · {(x.equipment as { tag?: string } | null)?.tag ?? "geral"} ·{" "}
-              {x.tipo} · {x.descricao_servico ?? ""}
+              {x.tipo} ·{" "}
+              <span className="text-neutral-500">
+                {(x.employees as { nome?: string } | null)?.nome ?? "sem funcionário"}
+              </span>
+              {" · "}
+              {x.descricao_servico ?? ""}
               {x.ocorrencias ? ` — ${x.ocorrencias}` : ""}
             </li>
           ))}

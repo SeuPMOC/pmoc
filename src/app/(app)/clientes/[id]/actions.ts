@@ -114,7 +114,7 @@ export async function registrarExecucao(clientId: string, f: FormData) {
     org_id: profile.org_id,
     client_id: clientId,
     equipment_id: str(f.get("equipment_id")),
-    technician_id: str(f.get("technician_id")),
+    employee_id: str(f.get("employee_id")),
     tipo: String(f.get("tipo")),
     status: "concluida",
     data_prevista: str(f.get("data_prevista")),
