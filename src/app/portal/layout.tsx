@@ -24,7 +24,7 @@ export default async function PortalLayout({
     <div className="min-h-screen">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-3">
         <div className="flex items-center gap-6">
-          <span className="font-bold">Portal PMOC</span>
+          <span className="font-bold">Portal SeuPMOC</span>
           <nav className="flex gap-4 text-sm">
             {nav.map(([label, href]) => (
               <Link key={href} href={href} className="text-neutral-600 hover:text-black">

@@ -47,7 +47,7 @@ export default function LoginPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold">PMOC</h1>
+        <h1 className="text-2xl font-bold">SeuPMOC</h1>
         <p className="text-sm text-neutral-500">
           Emissão e controle do Plano de Manutenção, Operação e Controle
         </p>

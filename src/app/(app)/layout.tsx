@@ -31,7 +31,7 @@ export default async function AppLayout({
     <div className="min-h-screen">
       <header className="flex items-center justify-between border-b px-6 py-3">
         <div className="flex items-center gap-6">
-          <span className="font-bold">PMOC</span>
+          <span className="font-bold">SeuPMOC</span>
           <nav className="flex gap-4 text-sm">
             {nav.map(([label, href]) => (
               <Link key={href} href={href} className="text-neutral-600 hover:text-black">
