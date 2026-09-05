@@ -54,7 +54,7 @@ export async function criarAmbiente(f: FormData) {
 
 export async function excluirAmbiente(id: string) {
   const { supabase } = await requireClient();
-  const { error } = await supabase.from("units").delete().eq("id", id);
+  const { error } = await supabase.from("units").update({ deleted_at: new Date().toISOString() }).eq("id", id);
   if (error) throw error;
   revalidatePath("/portal/ambientes");
   revalidatePath("/portal");
@@ -101,7 +101,7 @@ export async function criarEquipamento(f: FormData) {
 
 export async function excluirEquipamento(id: string) {
   const { supabase } = await requireClient();
-  const { error } = await supabase.from("equipment").delete().eq("id", id);
+  const { error } = await supabase.from("equipment").update({ deleted_at: new Date().toISOString() }).eq("id", id);
   if (error) throw error;
   revalidatePath("/portal/equipamentos");
   revalidatePath("/portal");

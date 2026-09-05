@@ -8,6 +8,7 @@ import { emitirPmoc } from "@/lib/pmoc/emitir";
 import { mesesPrevistos } from "@/lib/pmoc/cronograma";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { checarLimiteEquipamentos } from "@/lib/pmoc/limites";
+import { logAudit } from "@/lib/audit";
 
 const str = (v: FormDataEntryValue | null) =>
   v === null || v === "" ? null : String(v);
@@ -38,7 +39,10 @@ export async function criarUnidade(clientId: string, f: FormData) {
 
 export async function excluirUnidade(clientId: string, unitId: string) {
   const { supabase } = await staff();
-  const { error } = await supabase.from("units").delete().eq("id", unitId);
+  const { error } = await supabase
+    .from("units")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", unitId);
   if (error) throw error;
   rev(clientId);
 }
@@ -102,8 +106,22 @@ export async function aplicarPlanoPadrao(
 }
 
 export async function excluirEquipamento(clientId: string, equipmentId: string) {
-  const { supabase } = await staff();
-  await supabase.from("equipment").delete().eq("id", equipmentId);
+  const { supabase, user, profile } = await staff();
+  const { data: e } = await supabase
+    .from("equipment")
+    .select("tag")
+    .eq("id", equipmentId)
+    .single();
+  await supabase
+    .from("equipment")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", equipmentId);
+  await logAudit(supabase, profile.org_id, user, {
+    acao: "excluiu",
+    entidade: "equipamento",
+    entidadeId: equipmentId,
+    descricao: e?.tag,
+  });
   rev(clientId);
 }
 
@@ -215,7 +233,7 @@ export async function gerarOrdensDoAno(clientId: string, f: FormData) {
 
 // ---------- ART do PMOC ----------
 export async function anexarArt(clientId: string, pmocId: string, f: FormData) {
-  const { supabase } = await staff();
+  const { supabase, user, profile } = await staff();
 
   const { data: pmoc } = await supabase
     .from("pmoc_documents")
@@ -246,17 +264,28 @@ export async function anexarArt(clientId: string, pmocId: string, f: FormData) {
     })
     .eq("id", pmocId);
   if (error) throw error;
+  await logAudit(supabase, profile.org_id, user, {
+    acao: "anexou",
+    entidade: "art",
+    entidadeId: pmocId,
+    descricao: str(f.get("art_numero")) ?? undefined,
+  });
   rev(clientId);
 }
 
 // ---------- Emitir PMOC ----------
 export async function emitir(clientId: string, f: FormData) {
-  await staff();
+  const { supabase, user, profile } = await staff();
   const id = await emitirPmoc({
     clientId,
     periodoInicio: String(f.get("periodo_inicio")),
     periodoFim: String(f.get("periodo_fim")),
     technicianId: str(f.get("technician_id")) ?? undefined,
+  });
+  await logAudit(supabase, profile.org_id, user, {
+    acao: "emitiu",
+    entidade: "pmoc",
+    entidadeId: id,
   });
   redirect(`/api/pmoc/${id}/pdf`);
 }

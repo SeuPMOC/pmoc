@@ -26,7 +26,7 @@ export default async function AdminOrgPage({
 
   const [{ data: owners }, { data: clients }, { data: pagamentos }] = await Promise.all([
     admin.from("profiles").select("email, full_name").eq("org_id", orgId).eq("role", "owner"),
-    admin.from("clients").select("id").eq("org_id", orgId),
+    admin.from("clients").select("id").eq("org_id", orgId).is("deleted_at", null),
     admin
       .from("subscription_payments")
       .select("*")
@@ -38,6 +38,7 @@ export default async function AdminOrgPage({
   const { data: equip } = await admin
     .from("equipment")
     .select("id")
+    .is("deleted_at", null)
     .in("client_id", clientIds.length ? clientIds : [""]);
 
   const plano = PLANOS[org.plano as PlanoKey];

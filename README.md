@@ -18,8 +18,8 @@ Portaria MS 3.523/1998, ABNT NBR 13971, RE ANVISA 09/2003).
 3. Em **Authentication > Providers**, deixe *Email* habilitado. Para testes,
    desligue *Confirm email*.
 4. Rode também `0002_client_portal.sql`, `0003_equipment_types.sql`,
-   `0004_art.sql` (cria o bucket de storage `art`), `0005_billing_admin.sql`
-   e `0006_funcionarios.sql`.
+   `0004_art.sql` (cria o bucket de storage `art`), `0005_billing_admin.sql`,
+   `0006_funcionarios.sql` e `0007_soft_delete_audit.sql`.
 5. `cp .env.example .env.local` e preencha: `NEXT_PUBLIC_SUPABASE_URL`,
    `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server-side) e
    `PLATFORM_ADMIN_EMAILS` (seu e-mail, pra acessar `/admin`).
@@ -157,6 +157,22 @@ ativo/inativo). `maintenance_orders.employee_id` aponta pra quem executou —
 o formulário "Registrar execução" (`/clientes/[id]/acompanhamento`) usa isso em
 vez de responsável técnico. O nome do funcionário aparece no registro de
 execuções do PMOC emitido.
+
+### Endurecimento (`0007_soft_delete_audit.sql`)
+
+- **Soft delete** em `clients` / `units` / `equipment` (coluna `deleted_at`). As
+  policies de RLS foram recriadas pra esconder linhas apagadas — **nenhuma query
+  da app mudou**, a RLS filtra sozinha. Excluir manda pra lixeira; restaurar em
+  **Clientes → Lixeira** (`restaurarCliente`, via service role escopado ao org,
+  já que a RLS esconde os apagados até do dono). `ponytail:` sem purga automática
+  — adicionar cron de hard-delete após 90 dias quando fizer sentido.
+- **`audit_logs`** — log append-only (sem policy de update/delete). `logAudit()`
+  (`src/lib/audit.ts`) registra criar/excluir/restaurar cliente, excluir
+  equipamento, emitir PMOC e anexar ART. Visível em **Minha empresa → Histórico
+  de atividades**.
+- **Teste de RLS**: `node --experimental-strip-types scripts/test-rls.mjs` —
+  cria 2 contas descartáveis e prova que a Org B não vê/busca/altera dados da
+  Org A (roda contra um Supabase de staging, limpa os usuários no fim).
 
 ### Login
 

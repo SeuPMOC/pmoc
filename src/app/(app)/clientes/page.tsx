@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/supabase/auth";
 import { PageHeader, Panel } from "@/components/ui";
+import { listarClientesExcluidos, restaurarCliente } from "./actions";
 
 const hoje = new Date().toISOString().slice(0, 10);
 
@@ -32,6 +33,8 @@ export default async function ClientesPage({
   const atraso = new Map<string, number>();
   for (const o of atrasadas ?? [])
     atraso.set(o.client_id, (atraso.get(o.client_id) ?? 0) + 1);
+
+  const lixeira = await listarClientesExcluidos();
 
   return (
     <div className="flex flex-col gap-6">
@@ -101,6 +104,29 @@ export default async function ClientesPage({
           </ul>
         )}
       </Panel>
+
+      {lixeira.length > 0 && (
+        <Panel title={`Lixeira (${lixeira.length})`}>
+          <ul className="divide-y text-sm">
+            {lixeira.map((c) => (
+              <li key={c.id} className="flex items-center justify-between py-2">
+                <span className="text-neutral-500">
+                  {c.razao_social}
+                  <span className="ml-2 text-xs text-neutral-400">
+                    excluído em{" "}
+                    {new Date(c.deleted_at as string).toLocaleDateString("pt-BR")}
+                  </span>
+                </span>
+                <form action={restaurarCliente.bind(null, c.id)}>
+                  <button className="text-xs font-semibold text-blue-600 hover:underline">
+                    restaurar
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      )}
     </div>
   );
 }

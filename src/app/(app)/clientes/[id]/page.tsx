@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/supabase/auth";
 import { PageHeader, Panel, Field, Submit, Crumb } from "@/components/ui";
 import { EQUIP_TIPOS } from "@/lib/pmoc/catalogo";
 import { checklistPmoc } from "@/lib/pmoc/checklist";
-import { atualizarCliente } from "../actions";
+import { atualizarCliente, excluirCliente } from "../actions";
 import {
   criarUnidade,
   criarEquipamento,
@@ -325,6 +325,21 @@ export default async function ClienteDetalhe({
           </div>
         )}
       </Panel>
+
+      <details className="rounded-lg border border-red-200 bg-red-50/40 p-4 text-sm">
+        <summary className="cursor-pointer font-semibold text-red-700">
+          Zona de perigo
+        </summary>
+        <p className="mt-2 text-neutral-600">
+          Excluir manda o cliente e tudo dele (ambientes, equipamentos, PMOCs)
+          para a lixeira. Dá para restaurar em <b>Clientes → Lixeira</b>.
+        </p>
+        <form action={excluirCliente.bind(null, id)} className="mt-3">
+          <button className="rounded border border-red-400 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
+            Excluir cliente
+          </button>
+        </form>
+      </details>
     </div>
   );
 }

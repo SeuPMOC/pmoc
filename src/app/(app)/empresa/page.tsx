@@ -12,11 +12,18 @@ import {
 export default async function EmpresaPage() {
   const { supabase, profile } = await requireUser();
 
-  const [{ data: org }, { data: tecnicos }, { data: funcionarios }] = await Promise.all([
-    supabase.from("organizations").select("*").eq("id", profile.org_id).single(),
-    supabase.from("technicians").select("*").eq("org_id", profile.org_id).order("nome"),
-    supabase.from("employees").select("*").eq("org_id", profile.org_id).order("nome"),
-  ]);
+  const [{ data: org }, { data: tecnicos }, { data: funcionarios }, { data: auditoria }] =
+    await Promise.all([
+      supabase.from("organizations").select("*").eq("id", profile.org_id).single(),
+      supabase.from("technicians").select("*").eq("org_id", profile.org_id).order("nome"),
+      supabase.from("employees").select("*").eq("org_id", profile.org_id).order("nome"),
+      supabase
+        .from("audit_logs")
+        .select("id, acao, entidade, descricao, actor_email, created_at")
+        .eq("org_id", profile.org_id)
+        .order("created_at", { ascending: false })
+        .limit(40),
+    ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -98,6 +105,29 @@ export default async function EmpresaPage() {
           <Field label="E-mail" name="email" />
           <div className="md:col-span-4"><Submit>Adicionar funcionário</Submit></div>
         </form>
+      </Panel>
+
+      <Panel title="Histórico de atividades">
+        <p className="mb-3 text-sm text-neutral-500">
+          Registro do que foi feito na conta — quem fez e quando. Não pode ser editado.
+        </p>
+        <ul className="divide-y text-sm">
+          {(auditoria ?? []).map((a) => (
+            <li key={a.id} className="flex items-center justify-between py-2">
+              <span>
+                <b>{a.acao}</b> {a.entidade}
+                {a.descricao ? ` "${a.descricao}"` : ""}
+                <span className="ml-2 text-xs text-neutral-400">{a.actor_email}</span>
+              </span>
+              <span className="text-xs text-neutral-400">
+                {new Date(a.created_at).toLocaleString("pt-BR")}
+              </span>
+            </li>
+          ))}
+          {!auditoria?.length && (
+            <li className="py-2 text-neutral-500">Nada registrado ainda.</li>
+          )}
+        </ul>
       </Panel>
     </div>
   );

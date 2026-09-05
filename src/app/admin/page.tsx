@@ -17,7 +17,7 @@ export default async function AdminHome() {
 
   const [{ data: owners }, { data: clients }, { data: pagamentos }] = await Promise.all([
     admin.from("profiles").select("org_id, email, full_name").eq("role", "owner").in("org_id", orgIds.length ? orgIds : [""]),
-    admin.from("clients").select("id, org_id").in("org_id", orgIds.length ? orgIds : [""]),
+    admin.from("clients").select("id, org_id").is("deleted_at", null).in("org_id", orgIds.length ? orgIds : [""]),
     admin
       .from("subscription_payments")
       .select("org_id, valor, vencimento, status")
@@ -29,6 +29,7 @@ export default async function AdminHome() {
   const { data: equip } = await admin
     .from("equipment")
     .select("client_id")
+    .is("deleted_at", null)
     .in("client_id", clientIds.length ? clientIds : [""]);
 
   const clientCountByOrg = new Map<string, number>();
