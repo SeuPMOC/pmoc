@@ -1,14 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUser, isStaff } from "@/lib/supabase/auth";
-
-const str = (v: FormDataEntryValue | null) =>
-  v === null || v === "" ? null : String(v);
+import { requireStaff } from "@/lib/supabase/auth";
+import { str } from "@/lib/form";
 
 export async function criarFatura(f: FormData) {
-  const { supabase, profile } = await requireUser();
-  if (!isStaff(profile.role)) throw new Error("Sem permissão");
+  const { supabase, profile } = await requireStaff();
 
   const { error } = await supabase.from("invoices").insert({
     org_id: profile.org_id,
@@ -25,8 +22,7 @@ export async function criarFatura(f: FormData) {
 }
 
 export async function marcarPago(id: string) {
-  const { supabase, profile } = await requireUser();
-  if (!isStaff(profile.role)) throw new Error("Sem permissão");
+  const { supabase } = await requireStaff();
   await supabase
     .from("invoices")
     .update({ status: "pago", pago_em: new Date().toISOString().slice(0, 10) })
@@ -35,8 +31,7 @@ export async function marcarPago(id: string) {
 }
 
 export async function cancelarFatura(id: string) {
-  const { supabase, profile } = await requireUser();
-  if (!isStaff(profile.role)) throw new Error("Sem permissão");
+  const { supabase } = await requireStaff();
   await supabase.from("invoices").update({ status: "cancelado" }).eq("id", id);
   revalidatePath("/cobranca");
 }

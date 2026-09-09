@@ -1,13 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUser, isStaff } from "@/lib/supabase/auth";
+import { requireStaff } from "@/lib/supabase/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 // Cria um login de portal para o estabelecimento preencher os próprios dados.
 export async function criarAcessoPortal(clientId: string, f: FormData) {
-  const { supabase, user, profile } = await requireUser();
-  if (!isStaff(profile.role)) throw new Error("Sem permissão");
+  const { supabase, user, profile } = await requireStaff();
 
   const email = String(f.get("email")).trim().toLowerCase();
   const senha = String(f.get("senha"));
@@ -53,8 +52,7 @@ export async function criarAcessoPortal(clientId: string, f: FormData) {
 }
 
 export async function removerAcessoPortal(clientId: string, profileId: string) {
-  const { profile } = await requireUser();
-  if (!isStaff(profile.role)) throw new Error("Sem permissão");
+  const { profile } = await requireStaff();
 
   const admin = supabaseAdmin();
   // confere que o profile pertence à mesma org e ao cliente

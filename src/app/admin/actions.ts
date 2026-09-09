@@ -4,9 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requirePlatformAdmin } from "@/lib/supabase/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { PLANOS, type PlanoKey } from "@/lib/admin/planos";
-
-const str = (v: FormDataEntryValue | null) =>
-  v === null || v === "" ? null : String(v);
+import { str } from "@/lib/form";
 
 export async function atualizarAssinatura(orgId: string, f: FormData) {
   await requirePlatformAdmin();

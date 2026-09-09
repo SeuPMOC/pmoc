@@ -3,11 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireClient } from "@/lib/supabase/auth";
 import { planoPadraoParaTipo } from "@/lib/pmoc/catalogo";
-
-const str = (v: FormDataEntryValue | null) =>
-  v === null || v === "" ? null : String(v);
-const num = (v: FormDataEntryValue | null) =>
-  v === null || v === "" ? null : Number(v);
+import { str, num } from "@/lib/form";
 
 // ---------- Estabelecimento ----------
 export async function salvarEstabelecimento(f: FormData) {

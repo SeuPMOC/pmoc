@@ -2,24 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireUser, isStaff } from "@/lib/supabase/auth";
+import { requireStaff as staff } from "@/lib/supabase/auth";
 import { planoPadraoParaTipo } from "@/lib/pmoc/catalogo";
 import { emitirPmoc } from "@/lib/pmoc/emitir";
 import { mesesPrevistos } from "@/lib/pmoc/cronograma";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { checarLimiteEquipamentos } from "@/lib/pmoc/limites";
 import { logAudit } from "@/lib/audit";
-
-const str = (v: FormDataEntryValue | null) =>
-  v === null || v === "" ? null : String(v);
-const num = (v: FormDataEntryValue | null) =>
-  v === null || v === "" ? null : Number(v);
-
-async function staff() {
-  const ctx = await requireUser();
-  if (!isStaff(ctx.profile.role)) throw new Error("Sem permissão");
-  return ctx;
-}
+import { str, num } from "@/lib/form";
 
 const rev = (id: string) => revalidatePath(`/clientes/${id}`);
 

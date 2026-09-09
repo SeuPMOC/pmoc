@@ -25,6 +25,17 @@ Portaria MS 3.523/1998, ABNT NBR 13971, RE ANVISA 09/2003).
    `PLATFORM_ADMIN_EMAILS` (seu e-mail, pra acessar `/admin`).
 6. `npm install && npm run dev` → http://localhost:3000
 
+## Qualidade / harness
+
+- `npm run check` — roda `typecheck` (tsc), `lint` (eslint) e `test` em sequência.
+- `npm test` — testes de lógica pura com `node:test` (`src/**/*.test.ts`):
+  catálogo de equipamentos e cronograma. Sem framework.
+- `npm run db:seed` / `npm run db:test-rls` — scripts que precisam de um Supabase
+  real (`.env.local`); `db:test-rls` prova o isolamento entre organizações.
+- CI (`.github/workflows/ci.yml`) roda `check` + `build` em todo push/PR.
+- Helpers compartilhados: `src/lib/form.ts` (`str`/`num` de FormData),
+  `requireStaff()` em `src/lib/supabase/auth.ts`.
+
 ## Deploy no Netlify
 
 1. Push do repo pro GitHub, "Add new site" → importa o repo.

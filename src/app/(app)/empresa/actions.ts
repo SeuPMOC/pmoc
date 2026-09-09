@@ -1,16 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUser, isStaff } from "@/lib/supabase/auth";
-
-const str = (v: FormDataEntryValue | null) =>
-  v === null || v === "" ? null : String(v);
-
-async function staff() {
-  const ctx = await requireUser();
-  if (!isStaff(ctx.profile.role)) throw new Error("Sem permissão");
-  return ctx;
-}
+import { requireStaff as staff } from "@/lib/supabase/auth";
+import { str } from "@/lib/form";
 
 export async function salvarEmpresa(f: FormData) {
   const { supabase, profile } = await staff();

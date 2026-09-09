@@ -43,8 +43,8 @@ export default async function AppLayout({
           </nav>
         </div>
         <div className="text-sm text-neutral-500">
-          {/* @ts-expect-error relação aninhada */}
-          {prof?.organizations?.name} · {prof?.full_name ?? user.email}
+          {(prof?.organizations as { name?: string } | null)?.name} ·{" "}
+          {prof?.full_name ?? user.email}
         </div>
       </header>
       <main className="p-6">{children}</main>

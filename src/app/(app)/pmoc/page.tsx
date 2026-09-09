@@ -29,29 +29,41 @@ export default async function PmocPage() {
               </tr>
             </thead>
             <tbody>
-              {docs.map((d) => (
-                <tr key={d.id} className="border-b last:border-0">
-                  <td className="p-2">
-                    {/* @ts-expect-error relação aninhada */}
-                    <Link href={`/clientes/${d.clients?.id}`} className="text-blue-600 hover:underline">
-                      {/* @ts-expect-error relação aninhada */}
-                      {d.clients?.razao_social}
-                    </Link>
-                  </td>
-                  <td className="p-2">v{d.versao}</td>
-                  <td className="p-2">
-                    {d.periodo_inicio} a {d.periodo_fim}
-                  </td>
-                  <td className="p-2">
-                    {d.emitido_em ? new Date(d.emitido_em).toLocaleDateString("pt-BR") : "-"}
-                  </td>
-                  <td className="p-2">
-                    <a className="text-blue-600 underline" href={`/api/pmoc/${d.id}/pdf`} target="_blank">
-                      abrir
-                    </a>
-                  </td>
-                </tr>
-              ))}
+              {docs.map((d) => {
+                const cli = d.clients as
+                  | { id?: string; razao_social?: string }
+                  | null;
+                return (
+                  <tr key={d.id} className="border-b last:border-0">
+                    <td className="p-2">
+                      <Link
+                        href={`/clientes/${cli?.id}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {cli?.razao_social}
+                      </Link>
+                    </td>
+                    <td className="p-2">v{d.versao}</td>
+                    <td className="p-2">
+                      {d.periodo_inicio} a {d.periodo_fim}
+                    </td>
+                    <td className="p-2">
+                      {d.emitido_em
+                        ? new Date(d.emitido_em).toLocaleDateString("pt-BR")
+                        : "-"}
+                    </td>
+                    <td className="p-2">
+                      <a
+                        className="text-blue-600 underline"
+                        href={`/api/pmoc/${d.id}/pdf`}
+                        target="_blank"
+                      >
+                        abrir
+                      </a>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

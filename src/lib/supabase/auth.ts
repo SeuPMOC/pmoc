@@ -20,6 +20,13 @@ export async function requireUser() {
 
 export const isStaff = (role: string) => role === "owner" || role === "tech";
 
+// Exige que quem chamou seja owner/tech da própria empresa (não cliente-portal).
+export async function requireStaff() {
+  const ctx = await requireUser();
+  if (!isStaff(ctx.profile.role)) throw new Error("Sem permissão");
+  return ctx;
+}
+
 // Portal do cliente final: exige role='client' e um client_id vinculado.
 export async function requireClient() {
   const { supabase, user, profile } = await requireUser();

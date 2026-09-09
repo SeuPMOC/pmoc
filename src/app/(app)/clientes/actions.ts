@@ -2,15 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireUser, isStaff } from "@/lib/supabase/auth";
+import { requireUser, requireStaff } from "@/lib/supabase/auth";
 import { checarLimiteClientes } from "@/lib/pmoc/limites";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { logAudit } from "@/lib/audit";
-
-const num = (v: FormDataEntryValue | null) =>
-  v === null || v === "" ? null : Number(v);
-const str = (v: FormDataEntryValue | null) =>
-  v === null || v === "" ? null : String(v);
+import { str, num } from "@/lib/form";
 
 function payload(f: FormData) {
   return {
@@ -33,8 +29,7 @@ function payload(f: FormData) {
 }
 
 export async function criarCliente(f: FormData) {
-  const { supabase, user, profile } = await requireUser();
-  if (!isStaff(profile.role)) throw new Error("Sem permissão");
+  const { supabase, user, profile } = await requireStaff();
   await checarLimiteClientes(supabase, profile.org_id);
 
   const dados = payload(f);
@@ -57,8 +52,7 @@ export async function criarCliente(f: FormData) {
 }
 
 export async function atualizarCliente(id: string, f: FormData) {
-  const { supabase, profile } = await requireUser();
-  if (!isStaff(profile.role)) throw new Error("Sem permissão");
+  const { supabase } = await requireStaff();
 
   const { error } = await supabase.from("clients").update(payload(f)).eq("id", id);
   if (error) throw error;
@@ -67,8 +61,7 @@ export async function atualizarCliente(id: string, f: FormData) {
 
 // ---------- Soft delete / lixeira ----------
 export async function excluirCliente(id: string) {
-  const { supabase, user, profile } = await requireUser();
-  if (!isStaff(profile.role)) throw new Error("Sem permissão");
+  const { supabase, user, profile } = await requireStaff();
 
   const { data: c } = await supabase
     .from("clients")
@@ -107,8 +100,7 @@ export async function listarClientesExcluidos() {
 }
 
 export async function restaurarCliente(id: string) {
-  const { supabase, user, profile } = await requireUser();
-  if (!isStaff(profile.role)) throw new Error("Sem permissão");
+  const { supabase, user, profile } = await requireStaff();
 
   const admin = supabaseAdmin();
   const { data: c } = await admin

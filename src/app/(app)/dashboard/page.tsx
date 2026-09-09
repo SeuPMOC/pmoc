@@ -82,8 +82,9 @@ export default async function Dashboard() {
               <tbody>
                 {pmocs.data!.map((p) => (
                   <tr key={p.id} className="border-b last:border-0">
-                    {/* @ts-expect-error relação aninhada */}
-                    <td className="p-3">{p.clients?.razao_social}</td>
+                    <td className="p-3">
+                      {(p.clients as { razao_social?: string } | null)?.razao_social}
+                    </td>
                     <td className="p-3">v{p.versao}</td>
                     <td className="p-3">
                       {p.emitido_em
