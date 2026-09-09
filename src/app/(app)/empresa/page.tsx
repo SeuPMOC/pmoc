@@ -71,8 +71,8 @@ export default async function EmpresaPage() {
 
       <Panel title="Funcionários / equipe de campo">
         <p className="mb-3 text-sm text-neutral-500">
-          Quem sai a campo executando a manutenção. Aparecem no "Registrar execução"
-          de cada cliente, pra apontar quem fez cada serviço.
+          Quem sai a campo executando a manutenção. Aparecem no &quot;Registrar
+          execução&quot; de cada cliente, pra apontar quem fez cada serviço.
         </p>
         <ul className="mb-4 divide-y text-sm">
           {(funcionarios ?? []).map((e) => (

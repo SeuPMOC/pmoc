@@ -16,6 +16,21 @@ import {
 
 const anoAtual = new Date().getFullYear();
 
+function Passo({ n, titulo, ok }: { n: number; titulo: string; ok: boolean }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+          ok ? "bg-green-600 text-white" : "border border-neutral-300 text-neutral-400"
+        }`}
+      >
+        {ok ? "✓" : n}
+      </span>
+      <span className={ok ? "text-neutral-900" : "text-neutral-500"}>{titulo}</span>
+    </div>
+  );
+}
+
 export default async function ClienteDetalhe({
   params,
 }: {
@@ -54,19 +69,6 @@ export default async function ClienteDetalhe({
     ...(tecnicos ?? []).map((t) => ({ value: t.id, label: t.nome })),
   ];
   const semTecnico = !tecnicos?.length;
-
-  const Passo = ({ n, titulo, ok }: { n: number; titulo: string; ok: boolean }) => (
-    <div className="flex items-center gap-2">
-      <span
-        className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
-          ok ? "bg-green-600 text-white" : "border border-neutral-300 text-neutral-400"
-        }`}
-      >
-        {ok ? "✓" : n}
-      </span>
-      <span className={ok ? "text-neutral-900" : "text-neutral-500"}>{titulo}</span>
-    </div>
-  );
 
   const temAmbiente = (units?.length ?? 0) > 0;
   const equipComPlano =
