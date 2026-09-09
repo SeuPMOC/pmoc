@@ -93,7 +93,21 @@ try {
     .eq("org_id", cliente.org_id);
   assert.equal((auditB ?? []).length, 0, "FALHA: B leu o audit_logs da A");
 
-  console.log("RLS OK — Org B não vê, não busca, não altera dados da Org A");
+  // B tenta escalar privilégio movendo o próprio profile pra org da A
+  const { data: sessB } = await b.auth.getUser();
+  await b.from("profiles").update({ org_id: cliente.org_id, role: "owner" }).eq("id", sessB.user.id);
+  const { data: profB } = await b.from("profiles").select("org_id, role").eq("id", sessB.user.id).single();
+  assert.notEqual(profB?.org_id, cliente.org_id, "FALHA: B trocou o próprio org_id (escalonamento de privilégio)");
+
+  // e depois disso ainda não vê nada da A
+  const { data: listaB2 } = await b.from("clients").select("id");
+  assert.equal(
+    (listaB2 ?? []).some((c) => c.id === cliente.id),
+    false,
+    "FALHA: B ganhou acesso aos clientes da A",
+  );
+
+  console.log("RLS OK — Org B não vê, não busca, não altera, não escala privilégio");
 } finally {
   if (idA) await admin.auth.admin.deleteUser(idA);
   if (idB) await admin.auth.admin.deleteUser(idB);

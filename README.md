@@ -17,13 +17,36 @@ Portaria MS 3.523/1998, ABNT NBR 13971, RE ANVISA 09/2003).
 2. Em **SQL Editor**, rode `supabase/migrations/0001_init.sql`.
 3. Em **Authentication > Providers**, deixe *Email* habilitado. Para testes,
    desligue *Confirm email*.
-4. Rode também `0002_client_portal.sql`, `0003_equipment_types.sql`,
-   `0004_art.sql` (cria o bucket de storage `art`), `0005_billing_admin.sql`,
-   `0006_funcionarios.sql` e `0007_soft_delete_audit.sql`.
+4. Rode também as migrations `0002` a `0008` na ordem.
 5. `cp .env.example .env.local` e preencha: `NEXT_PUBLIC_SUPABASE_URL`,
    `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server-side) e
    `PLATFORM_ADMIN_EMAILS` (seu e-mail, pra acessar `/admin`).
 6. `npm install && npm run dev` → http://localhost:3000
+
+## Segurança
+
+Implementado (`0008_seguranca.sql` + código):
+
+- **Anti-escalonamento de privilégio**: trigger `profiles_protect_identity`
+  impede o usuário de trocar o próprio `org_id`/`role`/`client_id` chamando a
+  API do Supabase direto (era um caminho de acesso cross-tenant).
+- **Injeção no filtro de busca** (`.or()` do PostgREST): `q` é sanitizado
+  (só letras/números/espaço) antes de entrar no filtro.
+- **`audit_logs` à prova de forja**: só o service role escreve (`logAudit`
+  usa `supabaseAdmin`); usuário comum só lê o log do próprio org.
+- **Headers HTTP** (`next.config.ts`): CSP, `X-Frame-Options: DENY`,
+  `X-Content-Type-Options`, HSTS, `Referrer-Policy`, `Permissions-Policy`,
+  `poweredByHeader: false`.
+- **Limites de tamanho** em `organizations.name` / `profiles.full_name` e
+  truncamento no trigger de signup.
+- CI roda `npm audit --audit-level=high`. `scripts/test-rls.mjs` também testa
+  o anti-escalonamento.
+
+**Antes de vender ainda falta** (fora do código — precisa conta/serviço):
+confirmação de e-mail obrigatória no Supabase Auth + CAPTCHA (Turnstile);
+rate limiting nas rotas de PDF e auth; monitoramento (Sentry); backups PITR
+(Supabase Pro); política de privacidade + termos + DPA (LGPD); rotação da
+service_role key. Ver resposta do assistente para o checklist completo.
 
 ## Qualidade / harness
 

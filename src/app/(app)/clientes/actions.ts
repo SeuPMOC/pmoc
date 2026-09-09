@@ -40,7 +40,7 @@ export async function criarCliente(f: FormData) {
     .single();
   if (error) throw error;
 
-  await logAudit(supabase, profile.org_id, user, {
+  await logAudit(profile.org_id, user, {
     acao: "criou",
     entidade: "cliente",
     entidadeId: data.id,
@@ -75,7 +75,7 @@ export async function excluirCliente(id: string) {
     .eq("id", id);
   if (error) throw error;
 
-  await logAudit(supabase, profile.org_id, user, {
+  await logAudit(profile.org_id, user, {
     acao: "excluiu",
     entidade: "cliente",
     entidadeId: id,
@@ -100,7 +100,7 @@ export async function listarClientesExcluidos() {
 }
 
 export async function restaurarCliente(id: string) {
-  const { supabase, user, profile } = await requireStaff();
+  const { user, profile } = await requireStaff();
 
   const admin = supabaseAdmin();
   const { data: c } = await admin
@@ -111,7 +111,7 @@ export async function restaurarCliente(id: string) {
   if (!c || c.org_id !== profile.org_id) throw new Error("Cliente não encontrado");
 
   await admin.from("clients").update({ deleted_at: null }).eq("id", id);
-  await logAudit(supabase, profile.org_id, user, {
+  await logAudit(profile.org_id, user, {
     acao: "restaurou",
     entidade: "cliente",
     entidadeId: id,

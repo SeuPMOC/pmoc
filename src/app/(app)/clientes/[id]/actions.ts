@@ -106,7 +106,7 @@ export async function excluirEquipamento(clientId: string, equipmentId: string) 
     .from("equipment")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", equipmentId);
-  await logAudit(supabase, profile.org_id, user, {
+  await logAudit(profile.org_id, user, {
     acao: "excluiu",
     entidade: "equipamento",
     entidadeId: equipmentId,
@@ -254,7 +254,7 @@ export async function anexarArt(clientId: string, pmocId: string, f: FormData) {
     })
     .eq("id", pmocId);
   if (error) throw error;
-  await logAudit(supabase, profile.org_id, user, {
+  await logAudit(profile.org_id, user, {
     acao: "anexou",
     entidade: "art",
     entidadeId: pmocId,
@@ -265,14 +265,14 @@ export async function anexarArt(clientId: string, pmocId: string, f: FormData) {
 
 // ---------- Emitir PMOC ----------
 export async function emitir(clientId: string, f: FormData) {
-  const { supabase, user, profile } = await staff();
+  const { user, profile } = await staff();
   const id = await emitirPmoc({
     clientId,
     periodoInicio: String(f.get("periodo_inicio")),
     periodoFim: String(f.get("periodo_fim")),
     technicianId: str(f.get("technician_id")) ?? undefined,
   });
-  await logAudit(supabase, profile.org_id, user, {
+  await logAudit(profile.org_id, user, {
     acao: "emitiu",
     entidade: "pmoc",
     entidadeId: id,

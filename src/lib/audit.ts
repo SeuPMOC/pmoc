@@ -1,5 +1,5 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
+import { supabaseAdmin } from "./supabase/admin";
 
 type Entrada = {
   acao: "criou" | "atualizou" | "excluiu" | "restaurou" | "emitiu" | "anexou";
@@ -8,15 +8,16 @@ type Entrada = {
   descricao?: string;
 };
 
-// Registra a ação no audit_logs. Falha de log nunca derruba a ação real.
+// Registra a ação no audit_logs (via service role — a tabela não aceita insert
+// de usuário comum, pra ninguém forjar entradas). Falha de log nunca derruba a
+// ação real.
 export async function logAudit(
-  supabase: SupabaseClient,
   orgId: string,
   user: Pick<User, "id" | "email">,
   e: Entrada,
 ) {
   try {
-    await supabase.from("audit_logs").insert({
+    await supabaseAdmin().from("audit_logs").insert({
       org_id: orgId,
       actor_id: user.id,
       actor_email: user.email ?? null,

@@ -13,11 +13,21 @@ export default async function ClientesPage({
   const { q } = await searchParams;
   const { supabase } = await requireUser();
 
+  // remove metacaracteres do PostgREST (,()*:%\.) — evita injeção no filtro .or()
+  const busca = (q ?? "")
+    .normalize("NFC")
+    .replace(/[^\p{L}\p{N}\s&-]/gu, "")
+    .trim()
+    .slice(0, 80);
+
   let query = supabase
     .from("clients")
     .select("id, razao_social, nome_fantasia, cidade, uf")
     .order("razao_social");
-  if (q) query = query.or(`razao_social.ilike.%${q}%,nome_fantasia.ilike.%${q}%,cidade.ilike.%${q}%`);
+  if (busca)
+    query = query.or(
+      `razao_social.ilike.%${busca}%,nome_fantasia.ilike.%${busca}%,cidade.ilike.%${busca}%`,
+    );
 
   const [{ data: clientes }, { data: pmocs }, { data: atrasadas }] = await Promise.all([
     query,
