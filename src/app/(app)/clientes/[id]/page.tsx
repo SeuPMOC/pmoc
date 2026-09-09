@@ -334,13 +334,22 @@ export default async function ClienteDetalhe({
         </summary>
         <p className="mt-2 text-neutral-600">
           Excluir manda o cliente e tudo dele (ambientes, equipamentos, PMOCs)
-          para a lixeira. Dá para restaurar em <b>Clientes → Lixeira</b>.
+          para a lixeira. Dá para restaurar ou excluir de vez em{" "}
+          <b>Clientes → Lixeira</b>.
         </p>
-        <form action={excluirCliente.bind(null, id)} className="mt-3">
-          <button className="rounded border border-red-400 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
-            Excluir cliente
-          </button>
-        </form>
+        <div className="mt-3 flex gap-3">
+          <a
+            href={`/api/clientes/${id}/export`}
+            className="rounded border px-3 py-1.5 text-xs font-semibold hover:bg-neutral-100"
+          >
+            Exportar dados (JSON)
+          </a>
+          <form action={excluirCliente.bind(null, id)}>
+            <button className="rounded border border-red-400 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
+              Excluir cliente
+            </button>
+          </form>
+        </div>
       </details>
     </div>
   );

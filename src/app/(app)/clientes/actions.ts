@@ -119,3 +119,28 @@ export async function restaurarCliente(id: string) {
   });
   revalidatePath("/clientes");
 }
+
+// Exclusão definitiva (LGPD). Só da lixeira, e apaga tudo em cascata.
+export async function excluirClienteDefinitivo(id: string) {
+  const { user, profile } = await requireStaff();
+  if (profile.role !== "owner") throw new Error("Só o dono da conta pode excluir definitivamente.");
+
+  const admin = supabaseAdmin();
+  const { data: c } = await admin
+    .from("clients")
+    .select("id, org_id, razao_social, deleted_at")
+    .eq("id", id)
+    .single();
+  if (!c || c.org_id !== profile.org_id) throw new Error("Cliente não encontrado");
+  if (!c.deleted_at) throw new Error("Mande para a lixeira antes de excluir definitivamente.");
+
+  const { error } = await admin.from("clients").delete().eq("id", id);
+  if (error) throw error;
+  await logAudit(profile.org_id, user, {
+    acao: "excluiu",
+    entidade: "cliente",
+    entidadeId: id,
+    descricao: `${c.razao_social} (definitivo)`,
+  });
+  revalidatePath("/clientes");
+}

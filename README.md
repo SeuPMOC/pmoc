@@ -42,11 +42,16 @@ Implementado (`0008_seguranca.sql` + código):
 - CI roda `npm audit --audit-level=high`. `scripts/test-rls.mjs` também testa
   o anti-escalonamento.
 
-**Antes de vender ainda falta** (fora do código — precisa conta/serviço):
-confirmação de e-mail obrigatória no Supabase Auth + CAPTCHA (Turnstile);
-rate limiting nas rotas de PDF e auth; monitoramento (Sentry); backups PITR
-(Supabase Pro); política de privacidade + termos + DPA (LGPD); rotação da
-service_role key. Ver resposta do assistente para o checklist completo.
+Também implementado: gate de e-mail confirmado (`/confirme-email`), rate
+limiting (`0009_rate_limit.sql` + `src/lib/rate-limit.ts`) nas rotas de PDF e
+export, CAPTCHA Turnstile no login (ativa com `NEXT_PUBLIC_TURNSTILE_SITE_KEY`),
+exportação de dados por cliente (`/api/clientes/[id]/export`), exclusão
+definitiva (`excluirClienteDefinitivo`, só owner, só da lixeira), páginas
+`/termos` e `/privacidade` (rascunho) + `LEGAL/DPA-modelo.md`.
+
+**Passos de configuração (fora do repo): ver `SECURITY-SETUP.md`** — confirmar
+e-mail no Supabase, SMTP, chaves do Turnstile, Attack Protection, plano Pro
+(backups), Sentry, revisão jurídica dos termos.
 
 ## Qualidade / harness
 

@@ -13,6 +13,7 @@ export default async function AppLayout({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+  if (!user.email_confirmed_at) redirect("/confirme-email");
 
   const { data: prof } = await supabase
     .from("profiles")

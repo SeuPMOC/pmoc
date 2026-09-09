@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { requireUser } from "@/lib/supabase/auth";
+import { rateLimit, RateLimitError } from "@/lib/rate-limit";
 import { PlanilhaAcompanhamento } from "@/lib/pmoc/planilha";
 
 export const runtime = "nodejs";
@@ -16,7 +17,15 @@ export async function GET(
     Number(new URL(req.url).searchParams.get("ano")) || new Date().getFullYear();
   const tecnicoId = new URL(req.url).searchParams.get("tecnico");
 
-  const { supabase, profile } = await requireUser();
+  const { supabase, user, profile } = await requireUser();
+
+  try {
+    await rateLimit(`pdf:${user.id}`, 30);
+  } catch (e) {
+    if (e instanceof RateLimitError)
+      return NextResponse.json({ error: e.message }, { status: 429 });
+    throw e;
+  }
 
   const [{ data: org }, { data: client }, { data: tec }, { data: equipamentos }] =
     await Promise.all([

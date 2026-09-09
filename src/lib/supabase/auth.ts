@@ -9,6 +9,10 @@ export async function requireUser() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // Com "Confirm email" ligado no Supabase, e-mail não confirmado não passa.
+  // (Se estiver desligado, o Supabase já marca email_confirmed_at no signup.)
+  if (!user.email_confirmed_at) redirect("/confirme-email");
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("id, org_id, role, full_name, client_id")

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/supabase/auth";
 import { PageHeader, Panel } from "@/components/ui";
-import { listarClientesExcluidos, restaurarCliente } from "./actions";
+import {
+  listarClientesExcluidos,
+  restaurarCliente,
+  excluirClienteDefinitivo,
+} from "./actions";
 
 const hoje = new Date().toISOString().slice(0, 10);
 
@@ -127,11 +131,24 @@ export default async function ClientesPage({
                     {new Date(c.deleted_at as string).toLocaleDateString("pt-BR")}
                   </span>
                 </span>
-                <form action={restaurarCliente.bind(null, c.id)}>
-                  <button className="text-xs font-semibold text-blue-600 hover:underline">
-                    restaurar
-                  </button>
-                </form>
+                <span className="flex gap-3">
+                  <a
+                    href={`/api/clientes/${c.id}/export`}
+                    className="text-xs text-neutral-500 hover:underline"
+                  >
+                    exportar
+                  </a>
+                  <form action={restaurarCliente.bind(null, c.id)}>
+                    <button className="text-xs font-semibold text-blue-600 hover:underline">
+                      restaurar
+                    </button>
+                  </form>
+                  <form action={excluirClienteDefinitivo.bind(null, c.id)}>
+                    <button className="text-xs text-red-600 hover:underline">
+                      excluir definitivamente
+                    </button>
+                  </form>
+                </span>
               </li>
             ))}
           </ul>

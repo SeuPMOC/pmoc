@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 export const dynamic = "force-dynamic";
+
+const TURNSTILE = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,9 +16,17 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [orgNome, setOrgNome] = useState("");
+  const [captcha, setCaptcha] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
+
+  const captchaOpt = TURNSTILE && captcha ? { captchaToken: captcha } : {};
+
+  useEffect(() => {
+    (window as unknown as { onTurnstile?: (t: string) => void }).onTurnstile = (t) =>
+      setCaptcha(t);
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,9 +34,11 @@ export default function LoginPage() {
     setAviso(null);
     setCarregando(true);
     try {
+      if (TURNSTILE && !captcha) throw new Error("Confirme que você não é um robô.");
       if (modo === "recuperar") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-senha`,
+          ...captchaOpt,
         });
         if (error) throw error;
         setAviso("Se esse e-mail tiver conta, enviamos um link para redefinir a senha.");
@@ -35,13 +48,14 @@ export default function LoginPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password: senha,
-          options: { data: { org_name: orgNome } },
+          options: { data: { org_name: orgNome }, ...captchaOpt },
         });
         if (error) throw error;
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password: senha,
+          options: captchaOpt,
         });
         if (error) throw error;
       }
@@ -92,6 +106,35 @@ export default function LoginPage() {
             onChange={(e) => setSenha(e.target.value)}
           />
         )}
+        {modo === "criar" && (
+          <label className="flex items-start gap-2 text-xs text-neutral-600">
+            <input required type="checkbox" className="mt-0.5" />
+            <span>
+              Li e aceito os{" "}
+              <a href="/termos" target="_blank" className="underline">
+                Termos de Uso
+              </a>{" "}
+              e a{" "}
+              <a href="/privacidade" target="_blank" className="underline">
+                Política de Privacidade
+              </a>
+              .
+            </span>
+          </label>
+        )}
+        {TURNSTILE && (
+          <>
+            <Script
+              src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+              strategy="lazyOnload"
+            />
+            <div
+              className="cf-turnstile"
+              data-sitekey={TURNSTILE}
+              data-callback="onTurnstile"
+            />
+          </>
+        )}
         {erro && <p className="text-sm text-red-600">{erro}</p>}
         {aviso && <p className="text-sm text-green-700">{aviso}</p>}
         <button
@@ -131,6 +174,10 @@ export default function LoginPage() {
             {modo === "recuperar" ? "Voltar ao login" : "Esqueci minha senha"}
           </button>
         )}
+        <div className="flex gap-3 text-xs text-neutral-400">
+          <a href="/termos" className="hover:underline">Termos</a>
+          <a href="/privacidade" className="hover:underline">Privacidade</a>
+        </div>
       </div>
     </main>
   );

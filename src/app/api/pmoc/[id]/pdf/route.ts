@@ -4,6 +4,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { PDFDocument } from "pdf-lib";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { rateLimit, RateLimitError } from "@/lib/rate-limit";
 import { PmocPdf } from "@/lib/pmoc/pdf";
 import type { PmocSnapshot } from "@/lib/pmoc/tipos";
 
@@ -16,6 +17,19 @@ export async function GET(
 ) {
   const { id } = await params;
   const supabase = await supabaseServer();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+
+  try {
+    await rateLimit(`pdf:${user.id}`, 30);
+  } catch (e) {
+    if (e instanceof RateLimitError)
+      return NextResponse.json({ error: e.message }, { status: 429 });
+    throw e;
+  }
 
   const { data: doc, error } = await supabase
     .from("pmoc_documents")
