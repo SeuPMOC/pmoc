@@ -20,9 +20,9 @@ const env = Object.fromEntries(
     }),
 );
 
-const URL = env.NEXT_PUBLIC_SUPABASE_URL;
+const SB_URL = env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const admin = createClient(URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+const admin = createClient(SB_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 
@@ -44,7 +44,7 @@ async function novoUsuario(email, orgName) {
 }
 
 async function comoUsuario(email) {
-  const c = createClient(URL, ANON, { auth: { persistSession: false } });
+  const c = createClient(SB_URL, ANON, { auth: { persistSession: false } });
   const { error } = await c.auth.signInWithPassword({ email, password: senha });
   if (error) throw error;
   return c;
@@ -59,9 +59,10 @@ try {
   const a = await comoUsuario(emailA);
   const b = await comoUsuario(emailB);
 
+  const { data: perfilA } = await a.from("profiles").select("org_id").eq("id", idA).single();
   const { data: cliente, error: e1 } = await a
     .from("clients")
-    .insert({ razao_social: "Cliente secreto da Org A" })
+    .insert({ org_id: perfilA?.org_id, razao_social: "Cliente secreto da Org A" })
     .select("id, org_id")
     .single();
   assert.ok(!e1 && cliente, `A deveria criar cliente: ${e1?.message}`);
