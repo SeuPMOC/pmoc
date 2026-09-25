@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const metadata = { title: "Termos de Uso — SeuPMOC" };
 
 // RASCUNHO — revisar com advogado antes de publicar. Preencher os [colchetes].
@@ -35,7 +37,7 @@ export default function TermosPage() {
 
       <h2>4. Planos e pagamento</h2>
       <ul>
-        <li>Os planos e limites vigentes estão na <a href="/#planos">página inicial</a>.</li>
+        <li>Os planos e limites vigentes estão na <Link href="/#planos">página inicial</Link>.</li>
         <li>A assinatura é mensal, sem fidelidade, renovada automaticamente até o cancelamento.</li>
         <li>O não pagamento por mais de 10 (dez) dias após o vencimento pode levar à suspensão do acesso. Durante a suspensão você ainda pode exportar seus dados, que são mantidos por 90 (noventa) dias antes de eventual exclusão.</li>
         <li>Há um plano gratuito, sem prazo de validade e com limites de uso, para você testar o serviço.</li>
