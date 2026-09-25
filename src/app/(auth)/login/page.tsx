@@ -1,6 +1,9 @@
 "use client";
 
+import Image from "next/image";
+
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -70,8 +73,11 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold">SeuPMOC</h1>
+      <Link href="/" className="text-sm text-brand hover:underline">
+        ← Voltar para a página principal
+      </Link>
+      <div className="flex flex-col gap-3">
+        <Image src="/logo.png" alt="SeuPMOC" width={640} height={220} priority className="h-16 w-auto self-start" />
         <p className="text-sm text-neutral-500">
           Emissão e controle do Plano de Manutenção, Operação e Controle
         </p>
@@ -110,7 +116,11 @@ export default function LoginPage() {
           <label className="flex items-start gap-2 text-xs text-neutral-600">
             <input required type="checkbox" className="mt-0.5" />
             <span>
-              Li e aceito os{" "}
+              Li e estou ciente do tratamento de dados conforme a{" "}
+              <a href="/lgpd" target="_blank" className="underline">
+                LGPD
+              </a>
+              , e aceito os{" "}
               <a href="/termos" target="_blank" className="underline">
                 Termos de Uso
               </a>{" "}
@@ -139,7 +149,7 @@ export default function LoginPage() {
         {aviso && <p className="text-sm text-green-700">{aviso}</p>}
         <button
           disabled={carregando}
-          className="rounded bg-black px-3 py-2 text-white disabled:opacity-50"
+          className="rounded bg-brand px-3 py-2 text-white disabled:opacity-50"
         >
           {carregando
             ? "..."
@@ -177,6 +187,7 @@ export default function LoginPage() {
         <div className="flex gap-3 text-xs text-neutral-400">
           <a href="/termos" className="hover:underline">Termos</a>
           <a href="/privacidade" className="hover:underline">Privacidade</a>
+          <a href="/lgpd" className="hover:underline">LGPD</a>
         </div>
       </div>
     </main>

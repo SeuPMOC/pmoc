@@ -79,7 +79,7 @@ export function Field({
 
 export function Submit({ children = "Salvar" }: { children?: React.ReactNode }) {
   return (
-    <button className="rounded bg-black px-4 py-2 text-sm text-white hover:opacity-90">
+    <button className="rounded bg-brand px-4 py-2 text-sm text-white hover:opacity-90">
       {children}
     </button>
   );

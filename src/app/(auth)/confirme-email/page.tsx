@@ -43,7 +43,7 @@ export default function ConfirmeEmailPage() {
         <button
           onClick={reenviar}
           disabled={carregando}
-          className="rounded bg-black px-3 py-2 text-white disabled:opacity-50"
+          className="rounded bg-brand px-3 py-2 text-white disabled:opacity-50"
         >
           {carregando ? "..." : "Reenviar e-mail"}
         </button>

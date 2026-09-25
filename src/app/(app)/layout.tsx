@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
@@ -34,7 +35,7 @@ export default async function AppLayout({
     <div className="min-h-screen">
       <header className="flex items-center justify-between border-b px-6 py-3">
         <div className="flex items-center gap-6">
-          <span className="font-bold">SeuPMOC</span>
+          <Image src="/logo.png" alt="SeuPMOC" width={640} height={220} className="h-8 w-auto" />
           <nav className="flex gap-4 text-sm">
             {nav.map(([label, href]) => (
               <Link key={href} href={href} className="text-neutral-600 hover:text-black">

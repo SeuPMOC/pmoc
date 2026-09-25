@@ -317,7 +317,7 @@ export default async function ClienteDetalhe({
                         className="mt-1 block text-sm"
                       />
                     </label>
-                    <button className="rounded bg-black px-3 py-1.5 text-xs text-white hover:opacity-90">
+                    <button className="rounded bg-brand px-3 py-1.5 text-xs text-white hover:opacity-90">
                       {p.art_path ? "Atualizar ART" : "Anexar ART"}
                     </button>
                   </form>

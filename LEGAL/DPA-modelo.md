@@ -3,7 +3,7 @@
 > RASCUNHO. Revisar com assessoria jurídica. Anexo ao contrato de assinatura do SeuPMOC.
 
 **Controlador:** o CLIENTE (empresa de climatização assinante).
-**Operador:** [razão social do SeuPMOC], CNPJ [nº] (&ldquo;SeuPMOC&rdquo;).
+**Operador:** GCL Engenharia LTDA, CNPJ 48.988.878/0001-03 (&ldquo;SeuPMOC&rdquo;).
 
 ## 1. Objeto
 

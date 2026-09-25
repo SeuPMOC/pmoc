@@ -14,7 +14,7 @@ export default function PrivacidadePage() {
 
       <h2>1. Quem somos</h2>
       <p>
-        O SeuPMOC é operado por [razão social], CNPJ [nº], com sede em [endereço]
+        O SeuPMOC é operado por GCL Engenharia LTDA, CNPJ 48.988.878/0001-03, com sede em Uberlândia/MG
         (&quot;nós&quot;). Contato do encarregado de dados (DPO): [e-mail].
       </p>
 
@@ -78,9 +78,9 @@ export default function PrivacidadePage() {
       <h2>8. Retenção</h2>
       <p>
         Dados de PMOC e manutenção são mantidos enquanto a conta estiver ativa e
-        por [prazo] após o encerramento, para fins de comprovação regulatória.
+        por 30 (trinta) dias após o encerramento, para que você exporte os dados; depois são eliminados, salvo obrigação legal de guarda.
         Registros excluídos vão para a lixeira e são apagados definitivamente
-        após [90] dias, salvo pedido de exclusão imediata.
+        até serem excluídos definitivamente: automaticamente após 90 (noventa) dias, ou antes, se você pedir.
       </p>
 
       <h2>9. Direitos do titular</h2>

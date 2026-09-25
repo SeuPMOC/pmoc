@@ -57,7 +57,7 @@ export default async function ClientesPage({
         action={
           <Link
             href="/clientes/novo"
-            className="rounded bg-black px-4 py-2 text-sm text-white hover:opacity-90"
+            className="rounded bg-brand px-4 py-2 text-sm text-white hover:opacity-90"
           >
             + Novo cliente
           </Link>
