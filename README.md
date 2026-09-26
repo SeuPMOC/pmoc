@@ -6,22 +6,61 @@ Portaria MS 3.523/1998, ABNT NBR 13971, RE ANVISA 09/2003).
 
 ## Stack
 
-- **Next.js 16** (App Router) — UI + API num deploy só
-- **Supabase** — Postgres + Auth + Row Level Security (multi-tenant) + Storage
+- **Next.js 16** (App Router) — UI + API num deploy só, hospedado na **Netlify**
+  (`netlify.toml`, plugin `@netlify/plugin-nextjs`)
+- **Backend auto-hospedado** (servidor próprio, sem Supabase) com as mesmas peças
+  open source que o Supabase usa por dentro:
+  - **PostgreSQL 16** — dados + Row Level Security (multi-tenant)
+  - **GoTrue** — autenticação (cadastro, login, confirmação de e-mail, reset de senha)
+  - **PostgREST** — API REST sobre o banco
+  - **nginx** — porta de entrada (`/auth/v1`, `/rest/v1`, CORS), publicada via
+    túnel Cloudflare em `https://pmoc-api.server247.com.br`
+- **@supabase/supabase-js / @supabase/ssr** — só como biblioteca cliente: falam o
+  protocolo do GoTrue/PostgREST, por isso o código não depende do Supabase hospedado
 - **@react-pdf/renderer** + **pdf-lib** — PMOC/planilha em PDF, ART anexada
-- Deploy: **Vercel** ou **Netlify** (`netlify.toml` incluído, plugin `@netlify/plugin-nextjs`)
 
-## Setup
+```
+www.seupmoc.com.br (Netlify)
+        │ HTTPS
+        ▼
+pmoc-api.server247.com.br (túnel Cloudflare) ─► nginx ─┬─ /auth/v1 ─► GoTrue
+                                                       └─ /rest/v1 ─► PostgREST
+                                                                        │
+                                                                 Postgres "pmoc"
+```
 
-1. Crie um projeto no [Supabase](https://supabase.com).
-2. Em **SQL Editor**, rode `supabase/migrations/0001_init.sql`.
-3. Em **Authentication > Providers**, deixe *Email* habilitado. Para testes,
-   desligue *Confirm email*.
-4. Rode também as migrations `0002` a `0008` na ordem.
-5. `cp .env.example .env.local` e preencha: `NEXT_PUBLIC_SUPABASE_URL`,
-   `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server-side) e
-   `PLATFORM_ADMIN_EMAILS` (seu e-mail, pra acessar `/admin`).
-6. `npm install && npm run dev` → http://localhost:3000
+## Setup (desenvolvimento local)
+
+1. `cp .env.example .env.local` e preencha: `NEXT_PUBLIC_SUPABASE_URL` (URL da
+   API, ex. `https://pmoc-api.server247.com.br`), `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+   `SUPABASE_SERVICE_ROLE_KEY` (server-side) e `PLATFORM_ADMIN_EMAILS` (seu
+   e-mail, pra acessar `/admin`). As chaves ficam no servidor, em
+   `~/docker/.env` (`PMOC_ANON_KEY`, `PMOC_SERVICE_ROLE_KEY`).
+2. `npm install && npm run dev` → http://localhost:3000
+3. Para o login funcionar a partir do localhost, a origem `http://localhost:3000`
+   precisa estar liberada no CORS do gateway (`~/docker/pmoc/gateway.conf`).
+
+O código continua compatível com um projeto Supabase hospedado: basta apontar
+`NEXT_PUBLIC_SUPABASE_URL` para ele e rodar as migrations.
+
+## Backend no servidor
+
+Containers (em `~/docker/docker-compose.yml`): `postgres_247` (banco `pmoc`),
+`pmoc_auth` (GoTrue), `pmoc_rest` (PostgREST) e `pmoc_gateway` (nginx).
+Segredos gerados no servidor e guardados em `~/docker/.env` (`PMOC_*`).
+
+- **Migrations**: aplicar em ordem no banco `pmoc` e depois recarregar o schema
+  do PostgREST:
+  ```bash
+  cat supabase/migrations/00XX_nome.sql | ssh server247 'docker exec -i postgres_247 sh -c "psql -U \$POSTGRES_USER -d pmoc -v ON_ERROR_STOP=1"'
+  ssh server247 docker restart pmoc_rest
+  ```
+- **Criar conta sem e-mail** (já confirmada): `ssh -t server247 bash ~/pmoc-criar-conta.sh`
+- **Purga da lixeira** (`0010`): cron do servidor roda `select purge_lixeira()`
+  todo dia (o `pg_cron` do Supabase não existe aqui; a migration só agenda por
+  ele quando a extensão está disponível).
+- **Backup**: `pg_dumpall` diário (inclui `pmoc` e o schema `auth`), 14 dias no
+  servidor + cópia no OneDrive.
 
 ## Segurança
 
@@ -29,7 +68,7 @@ Implementado (`0008_seguranca.sql` + código):
 
 - **Anti-escalonamento de privilégio**: trigger `profiles_protect_identity`
   impede o usuário de trocar o próprio `org_id`/`role`/`client_id` chamando a
-  API do Supabase direto (era um caminho de acesso cross-tenant).
+  API (PostgREST) direto (era um caminho de acesso cross-tenant).
 - **Injeção no filtro de busca** (`.or()` do PostgREST): `q` é sanitizado
   (só letras/números/espaço) antes de entrar no filtro.
 - **`audit_logs` à prova de forja**: só o service role escreve (`logAudit`
@@ -49,17 +88,17 @@ exportação de dados por cliente (`/api/clientes/[id]/export`), exclusão
 definitiva (`excluirClienteDefinitivo`, só owner, só da lixeira), páginas
 `/termos` e `/privacidade` (rascunho) + `LEGAL/DPA-modelo.md`.
 
-**Passos de configuração (fora do repo): ver `SECURITY-SETUP.md`** — confirmar
-e-mail no Supabase, SMTP, chaves do Turnstile, Attack Protection, plano Pro
-(backups), Sentry, revisão jurídica dos termos.
+**Passos de configuração (fora do repo): ver `SECURITY-SETUP.md`** — SMTP do
+GoTrue, chaves do Turnstile, rate limit de autenticação, backups, Sentry,
+revisão jurídica dos termos.
 
 ## Qualidade / harness
 
 - `npm run check` — roda `typecheck` (tsc), `lint` (eslint) e `test` em sequência.
 - `npm test` — testes de lógica pura com `node:test` (`src/**/*.test.ts`):
   catálogo de equipamentos e cronograma. Sem framework.
-- `npm run db:seed` / `npm run db:test-rls` — scripts que precisam de um Supabase
-  real (`.env.local`); `db:test-rls` prova o isolamento entre organizações.
+- `npm run db:seed` / `npm run db:test-rls` — scripts que precisam da API real
+  (`.env.local`); `db:test-rls` prova o isolamento entre organizações.
 - CI (`.github/workflows/ci.yml`) roda `check` + `build` em todo push/PR.
 - Helpers compartilhados: `src/lib/form.ts` (`str`/`num` de FormData),
   `requireStaff()` em `src/lib/supabase/auth.ts`.
@@ -69,11 +108,16 @@ e-mail no Supabase, SMTP, chaves do Turnstile, Attack Protection, plano Pro
 1. Push do repo pro GitHub, "Add new site" → importa o repo.
 2. O repositório é a pasta `pmoc-app` (é onde está o `.git`). Base directory em
    branco. Build: `npm run build` (o `netlify.toml` já define isso e o plugin Next).
-3. Site settings → Environment variables: `NEXT_PUBLIC_SUPABASE_URL`,
-   `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
-4. No Supabase → Authentication → URL Configuration: adicione a URL do site do
-   Netlify em *Site URL* e *Redirect URLs*.
-5. Deploy. As rotas de PDF viram Netlify Functions (Node) automaticamente.
+3. Site settings → Environment variables: `NEXT_PUBLIC_SUPABASE_URL`
+   (`https://pmoc-api.server247.com.br`), `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+   `SUPABASE_SERVICE_ROLE_KEY`, `PLATFORM_ADMIN_EMAILS`. As `NEXT_PUBLIC_*` entram
+   no build — trocou, precisa de novo deploy.
+4. URL do site (links dos e-mails de confirmação/reset): no servidor,
+   `PMOC_SITE_URL` em `~/docker/.env` e `GOTRUE_URI_ALLOW_LIST` no compose.
+   Domínio novo do front também precisa entrar no `map` de CORS do
+   `~/docker/pmoc/gateway.conf`.
+5. Deploy. Push no `main` publica sozinho. As rotas de PDF viram Netlify
+   Functions (Node) automaticamente.
 
 O primeiro cadastro cria a organização (trigger `handle_new_user`) e o usuário
 vira `owner`.
@@ -135,11 +179,12 @@ A empresa prestadora (org) faz tudo. Não há login para o estabelecimento.
 `checklistPmoc` (`src/lib/pmoc/checklist.ts`) mostra o que falta no passo 4.
 
 **ART por PMOC** (`0004_art.sql`): cada `pmoc_documents` tem `art_numero`,
-`art_registrada_em` e `art_path` (PDF no bucket `art`, privado). No passo 4, cada
-PMOC emitido tem um mini-form para nº + data + arquivo (`anexarArt`). A rota
-`/api/pmoc/[id]/pdf` injeta o nº da ART na seção 3 e, com `pdf-lib`, anexa as
-páginas do PDF da ART ao fim do PMOC — um download só. Upload/download pelo
-service role (`supabaseAdmin`).
+`art_registrada_em` e `art_path`. O PDF fica na tabela `art_files` (`0011`,
+base64, RLS sem policy = só o service role acessa) — entra no backup do banco.
+No passo 4, cada PMOC emitido tem um mini-form para nº + data + arquivo
+(`anexarArt`). A rota `/api/pmoc/[id]/pdf` injeta o nº da ART na seção 3 e, com
+`pdf-lib`, anexa as páginas do PDF da ART ao fim do PMOC — um download só.
+Leitura/gravação em `src/lib/art-storage.ts` (service role).
 
 Planilha de acompanhamento: `src/lib/pmoc/planilha.tsx` (documento em paisagem,
 uma tabela por equipamento com atividade × 12 meses, ○ = previsto). Compartilha
@@ -182,7 +227,7 @@ e-mail precisa estar em `PLATFORM_ADMIN_EMAILS` (`.env.local`) — aí um item
 - `subscription_payments` e as colunas de billing de `organizations` não têm
   policy de RLS pro usuário comum — só o service role (`supabaseAdmin()`) lê/escreve;
   um trigger (`0005_billing_admin.sql`) também impede o dono da empresa de mudar
-  seu próprio plano chamando a API do Supabase direto.
+  seu próprio plano chamando a API direto.
 - **Cobrança das mensalidades hoje é manual** (você registra e marca pago). Automatizar
   com um gateway (Asaas/Stripe) é o próximo passo óbvio — a tela `/admin/[orgId]`
   não muda, só o que preenche `subscription_payments` passa a ser um webhook.
@@ -203,33 +248,35 @@ execuções do PMOC emitido.
   policies de RLS foram recriadas pra esconder linhas apagadas — **nenhuma query
   da app mudou**, a RLS filtra sozinha. Excluir manda pra lixeira; restaurar em
   **Clientes → Lixeira** (`restaurarCliente`, via service role escopado ao org,
-  já que a RLS esconde os apagados até do dono). `ponytail:` sem purga automática
-  — adicionar cron de hard-delete após 90 dias quando fizer sentido.
+  já que a RLS esconde os apagados até do dono). Exclusão definitiva automática
+  após 90 dias na lixeira: `0010_purga_lixeira.sql` (cron do servidor).
 - **`audit_logs`** — log append-only (sem policy de update/delete). `logAudit()`
   (`src/lib/audit.ts`) registra criar/excluir/restaurar cliente, excluir
   equipamento, emitir PMOC e anexar ART. Visível em **Minha empresa → Histórico
   de atividades**.
 - **Teste de RLS**: `node --experimental-strip-types scripts/test-rls.mjs` —
   cria 2 contas descartáveis e prova que a Org B não vê/busca/altera dados da
-  Org A (roda contra um Supabase de staging, limpa os usuários no fim).
+  Org A (roda contra a API configurada no `.env.local`, limpa os usuários no
+  fim; as organizações de teste ficam — apagar as `%(teste RLS)`).
 
 ### Login
 
 - Criar conta / entrar / **esqueci minha senha** (`resetPasswordForEmail` →
-  `/reset-senha`). Precisa de SMTP configurado no Supabase (Authentication →
-  Email Templates) pra o e-mail realmente sair — sem isso funciona local com o
-  link aparecendo nos logs do Supabase.
+  `/reset-senha`). Os e-mails saem pelo GoTrue: precisa de SMTP em
+  `PMOC_SMTP_*` (`~/docker/.env`) e `docker compose up -d pmoc-auth`. Sem SMTP,
+  cadastro/reset pelo site não enviam e-mail — use `~/pmoc-criar-conta.sh`.
+  Os links dos e-mails passam por `https://pmoc-api.server247.com.br/auth/v1/verify`
+  e voltam para `https://www.seupmoc.com.br`.
 
 ## Roadmap
 
 | Módulo | Falta |
 |---|---|
 | Alertas | e-mail/WhatsApp de OS vencida (cron sobre as OS já geradas) |
-| Execução | upload de fotos (Supabase Storage) + assinatura do cliente |
+| Execução | upload de fotos (mesmo esquema da ART ou armazenamento de objetos) + assinatura do cliente |
 | Cobrança | integração de pagamento (Asaas/Stripe/Pix) — hoje é link manual |
 | Notificações | e-mail/WhatsApp de manutenção vencida e fatura a vencer |
-| PDF | persistir em Storage p/ link estável (hoje renderiza on-demand) |
+| PDF | persistir o PDF gerado p/ link estável (hoje renderiza on-demand) |
 
-`ponytail:` PDF sem upload p/ Storage — renderiza on-demand a partir de
-`dados_json`. Adicionar persistência em Storage quando precisar de link estável
-para o cliente.
+`ponytail:` PDF não é persistido — renderiza on-demand a partir de
+`dados_json`. Persistir quando precisar de link estável para o cliente.

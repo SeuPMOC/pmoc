@@ -63,16 +63,18 @@ export default function PrivacidadePage() {
       <h2>6. Compartilhamento</h2>
       <p>
         Não vendemos dados. Compartilhamos apenas com sub-operadores necessários à
-        prestação do serviço: [Supabase — banco de dados e autenticação],
-        [Netlify — hospedagem], [gateway de pagamento], [provedor de e-mail].
+        prestação do serviço: [Netlify — hospedagem do site], [Cloudflare — rede
+        e proteção do tráfego até o servidor], [Microsoft OneDrive — cópia de
+        backup], [gateway de pagamento], [provedor de e-mail]. O banco de dados e
+        a autenticação ficam em servidor próprio do SeuPMOC.
         A lista atualizada de sub-operadores está em [link].
       </p>
 
       <h2>7. Armazenamento e segurança</h2>
       <p>
-        Dados armazenados em servidores em [região], com criptografia em trânsito
-        (HTTPS) e em repouso, isolamento por organização (RLS), registro de
-        auditoria e backups. Detalhes de segurança sob demanda.
+        Dados armazenados em servidor próprio em [região], com criptografia em
+        trânsito (HTTPS), isolamento por organização (RLS), registro de auditoria
+        e backups diários. Detalhes de segurança sob demanda.
       </p>
 
       <h2>8. Retenção</h2>

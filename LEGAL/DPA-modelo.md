@@ -30,9 +30,10 @@ intencional; o Controlador se compromete a não inserir dados dessa natureza.
 - Auxiliar o Controlador no atendimento a titulares e à ANPD.
 - Notificar o Controlador em até [48] horas de qualquer incidente de segurança
   relevante.
-- Não subcontratar sem autorização; sub-operadores atuais: Supabase (banco e
-  autenticação), Netlify (hospedagem), [gateway de pagamento], [provedor de
-  e-mail].
+- Não subcontratar sem autorização. Banco de dados e autenticação ficam em
+  servidor próprio do SeuPMOC; sub-operadores atuais: Netlify (hospedagem do
+  site), Cloudflare (rede e proteção do tráfego até o servidor), Microsoft
+  OneDrive (cópia de backup), [gateway de pagamento], [provedor de e-mail].
 
 ## 4. Direitos dos titulares
 
@@ -47,8 +48,9 @@ Após esse prazo, o SeuPMOC elimina os dados, salvo obrigação legal de guarda.
 
 ## 6. Transferência internacional
 
-[Preencher conforme a região de hospedagem do Supabase. Se fora do Brasil,
-indicar a base legal e as garantias.]
+[O banco de dados fica em servidor próprio no Brasil — confirmar. Há trânsito
+e/ou cópia fora do Brasil pelos sub-operadores Netlify, Cloudflare e Microsoft
+OneDrive (backup): indicar a base legal e as garantias de cada um.]
 
 ## 7. Responsabilidade
 

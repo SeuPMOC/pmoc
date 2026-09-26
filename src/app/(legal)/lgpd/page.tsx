@@ -50,9 +50,11 @@ export default function LgpdPage() {
 
       <h2>Compartilhamento</h2>
       <p>
-        Não vendemos dados. Usamos apenas os prestadores necessários ao serviço:
-        Supabase (banco de dados e autenticação), Netlify (hospedagem) e, quando
-        aplicável, provedor de e-mail e de pagamento.
+        Não vendemos dados. O banco de dados e a autenticação ficam em servidor
+        próprio do SeuPMOC. Usamos apenas os prestadores necessários ao serviço:
+        Netlify (hospedagem do site), Cloudflare (rede e proteção do tráfego),
+        Microsoft OneDrive (cópia de backup) e, quando aplicável, provedor de
+        e-mail e de pagamento.
       </p>
 
       <h2>Retenção</h2>
