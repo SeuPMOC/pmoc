@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { PDFDocument } from "pdf-lib";
 import { supabaseServer } from "@/lib/supabase/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { lerArt } from "@/lib/art-storage";
 import { rateLimit, RateLimitError } from "@/lib/rate-limit";
 import { PmocPdf } from "@/lib/pmoc/pdf";
 import type { PmocSnapshot } from "@/lib/pmoc/tipos";
@@ -59,13 +59,11 @@ export async function GET(
 
   // anexa as páginas da ART, se houver arquivo
   if (doc.art_path) {
-    const { data: artFile } = await supabaseAdmin()
-      .storage.from("art")
-      .download(doc.art_path);
+    const artFile = await lerArt(doc.art_path);
     if (artFile) {
       try {
         const merged = await PDFDocument.load(pdfBytes);
-        const art = await PDFDocument.load(await artFile.arrayBuffer());
+        const art = await PDFDocument.load(artFile);
         const pages = await merged.copyPages(art, art.getPageIndices());
         pages.forEach((p) => merged.addPage(p));
         pdfBytes = await merged.save();

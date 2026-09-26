@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV !== "production";
+const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+  : "";
 
 // CSP base. Next.js sem nonce precisa de 'unsafe-inline' em style/script;
 // 'unsafe-eval' só no dev. Endurecer com nonce é um passo seguinte.
@@ -10,7 +13,8 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  // + a origem da API configurada (Supabase auto-hospedado fica fora de *.supabase.co)
+  `connect-src 'self' https://*.supabase.co wss://*.supabase.co ${supabaseOrigin}`.trim(),
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

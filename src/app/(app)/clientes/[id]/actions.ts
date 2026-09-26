@@ -6,7 +6,7 @@ import { requireStaff as staff } from "@/lib/supabase/auth";
 import { planoPadraoParaTipo } from "@/lib/pmoc/catalogo";
 import { emitirPmoc } from "@/lib/pmoc/emitir";
 import { mesesPrevistos } from "@/lib/pmoc/cronograma";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { salvarArt } from "@/lib/art-storage";
 import { checarLimiteEquipamentos } from "@/lib/pmoc/limites";
 import { logAudit } from "@/lib/audit";
 import { str, num } from "@/lib/form";
@@ -239,10 +239,7 @@ export async function anexarArt(clientId: string, pmocId: string, f: FormData) {
     if (file.type !== "application/pdf") throw new Error("A ART deve ser um arquivo PDF.");
     if (file.size > 10 * 1024 * 1024) throw new Error("Arquivo acima de 10 MB.");
     art_path = `${pmoc.org_id}/${pmocId}.pdf`;
-    const { error } = await supabaseAdmin()
-      .storage.from("art")
-      .upload(art_path, file, { upsert: true, contentType: "application/pdf" });
-    if (error) throw error;
+    await salvarArt(pmoc.org_id, art_path, file);
   }
 
   const { error } = await supabase
