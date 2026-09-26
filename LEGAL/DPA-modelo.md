@@ -48,7 +48,7 @@ Após esse prazo, o SeuPMOC elimina os dados, salvo obrigação legal de guarda.
 
 ## 6. Transferência internacional
 
-[O banco de dados fica em servidor próprio no Brasil — confirmar. Há trânsito
+O banco de dados fica em servidor próprio no Brasil. Há trânsito
 e/ou cópia fora do Brasil pelos sub-operadores Netlify, Cloudflare e Microsoft
 OneDrive (backup): indicar a base legal e as garantias de cada um.]
 

@@ -72,7 +72,7 @@ export default function PrivacidadePage() {
 
       <h2>7. Armazenamento e segurança</h2>
       <p>
-        Dados armazenados em servidor próprio em [região], com criptografia em
+        Dados armazenados em servidor próprio localizado no Brasil, com criptografia em
         trânsito (HTTPS), isolamento por organização (RLS), registro de auditoria
         e backups diários. Detalhes de segurança sob demanda.
       </p>
