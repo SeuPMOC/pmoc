@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireClient } from "@/lib/supabase/auth";
+import { sair } from "@/lib/sair";
 
 export default async function PortalLayout({
   children,
@@ -33,8 +34,11 @@ export default async function PortalLayout({
             ))}
           </nav>
         </div>
-        <div className="text-sm text-neutral-500">
-          {client?.razao_social} · {user.email}
+        <div className="flex items-center gap-3 text-sm text-neutral-500">
+          <span>{client?.razao_social} · {user.email}</span>
+          <form action={sair}>
+            <button className="rounded border px-3 py-1 text-neutral-600 hover:bg-neutral-50">Sair</button>
+          </form>
         </div>
       </header>
       <main className="mx-auto max-w-4xl p-6">{children}</main>

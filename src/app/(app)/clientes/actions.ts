@@ -134,8 +134,11 @@ export async function excluirClienteDefinitivo(id: string) {
   if (!c || c.org_id !== profile.org_id) throw new Error("Cliente não encontrado");
   if (!c.deleted_at) throw new Error("Mande para a lixeira antes de excluir definitivamente.");
 
+  const { data: docs } = await admin.from("pmoc_documents").select("art_path").eq("client_id", id);
   const { error } = await admin.from("clients").delete().eq("id", id);
   if (error) throw error;
+  const artPaths = (docs ?? []).map((d) => d.art_path).filter((p): p is string => !!p);
+  if (artPaths.length) await admin.from("art_files").delete().in("path", artPaths);
   await logAudit(profile.org_id, user, {
     acao: "excluiu",
     entidade: "cliente",

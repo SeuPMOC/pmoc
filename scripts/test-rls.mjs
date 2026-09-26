@@ -110,7 +110,12 @@ try {
 
   console.log("RLS OK — Org B não vê, não busca, não altera, não escala privilégio");
 } finally {
-  if (idA) await admin.auth.admin.deleteUser(idA);
-  if (idB) await admin.auth.admin.deleteUser(idB);
-  console.log("usuários de teste removidos");
+  const ids = [idA, idB].filter(Boolean);
+  const { data: perfis } = ids.length
+    ? await admin.from("profiles").select("org_id").in("id", ids)
+    : { data: [] };
+  for (const id of ids) await admin.auth.admin.deleteUser(id);
+  const orgs = (perfis ?? []).map((p) => p.org_id);
+  if (orgs.length) await admin.from("organizations").delete().in("id", orgs);
+  console.log("usuários e organizações de teste removidos");
 }
