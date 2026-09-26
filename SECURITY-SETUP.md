@@ -55,17 +55,23 @@ Templates em PT-BR: `GOTRUE_MAILER_TEMPLATES_*` / `GOTRUE_MAILER_SUBJECTS_*`.
 
 - `pg_dumpall` diário no servidor (inclui o banco `pmoc`, o schema `auth` e os
   PDFs de ART em `art_files`), retido 14 dias, com cópia no OneDrive (30 dias).
+- **Criptografados** antes de sair do servidor: gzip + `gpg` AES-256
+  (`*.sql.gz.gpg`), senha em `~/.backup-pass` — cópia da senha guardada fora do
+  servidor e fora do OneDrive, senão os backups ficam ilegíveis.
+- Restaurar: `gpg --batch --pinentry-mode loopback --passphrase-file ~/.backup-pass -d ARQ.sql.gz.gpg | gunzip | docker exec -i postgres_247 psql -U docker247`
+- Restauração testada em 2026-09-26 (Postgres temporário): contagens de
+  usuários, organizações, policies de RLS e tabelas de todos os bancos batem.
+  Repetir o teste periodicamente.
 - Sem PITR (recuperação para um instante exato) — a perda máxima é de até 1 dia.
-- **Testar a restauração pelo menos uma vez** (restaurar o dump num banco
-  temporário e conferir contagem de linhas).
 
 ## 6. Criptografia em repouso
 
-O disco do servidor e os arquivos de backup **não são criptografados** (o
-Supabase hospedado fazia isso). Antes de dado real de cliente, avaliar:
-criptografia do disco da VM/Proxmox (LUKS) e, no mínimo, criptografar os dumps
-antes de irem para o OneDrive (ex.: `gpg --symmetric`). A política de
-privacidade só promete criptografia em trânsito enquanto isso não existir.
+Backups: criptografados (item 5). O **disco do banco ainda não é
+criptografado** (o Supabase hospedado fazia isso). Planejado: LUKS no disco de
+dados, destravado por Clevis/Tang com o servidor Tang num equipamento físico
+diferente do host Proxmox (+ senha de recuperação guardada fora do servidor).
+A política de privacidade só promete criptografia em trânsito enquanto isso
+não existir.
 
 ## 7. Monitoramento de erros (Sentry)
 
@@ -128,8 +134,9 @@ ser adicionado lá + `docker exec pmoc_gateway nginx -s reload`.
 - [ ] SMTP configurado (+ SPF/DKIM)
 - [ ] Turnstile: site key na Netlify + secret no GoTrue + CSP liberada
 - [x] Rate limit de auth por IP real (`CF-Connecting-IP`)
-- [ ] Restauração de backup testada
-- [ ] Criptografia em repouso (disco e/ou backups)
+- [x] Backups criptografados (gpg AES-256) antes de irem para o OneDrive
+- [x] Restauração de backup testada
+- [ ] Criptografia em repouso do disco do banco (LUKS + Clevis/Tang)
 - [ ] Sentry instalado e com DSN
 - [ ] Termos e Privacidade revisados por advogado
 - [ ] DPA pronto para assinatura
