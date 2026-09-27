@@ -25,7 +25,7 @@ export default function ResetSenhaPage() {
       if (error) throw error;
       setOk(true);
       setTimeout(() => {
-        router.replace("/");
+        router.replace("/dashboard");
         router.refresh();
       }, 1500);
     } catch (err) {

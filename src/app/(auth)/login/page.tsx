@@ -62,7 +62,7 @@ export default function LoginPage() {
         });
         if (error) throw error;
       }
-      router.replace("/");
+      router.replace("/dashboard");
       router.refresh();
     } catch (err) {
       setErro(err instanceof Error ? err.message : "Falha na autenticação");

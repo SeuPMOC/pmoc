@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { PLANOS } from "@/lib/admin/planos";
 
@@ -64,9 +63,11 @@ export default async function Home() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  // logado: a landing continua acessível e os botões levam ao sistema
+  let entrada = "/login";
   if (user) {
     const { data: prof } = await supabase.from("profiles").select("role").single();
-    redirect(prof?.role === "client" ? "/portal" : "/dashboard");
+    entrada = prof?.role === "client" ? "/portal" : "/dashboard";
   }
 
   const planos = Object.entries(PLANOS);
@@ -79,10 +80,11 @@ export default async function Home() {
           <nav className="flex items-center gap-6 text-sm font-medium">
             <a href="#recursos" className="hidden hover:text-brand md:inline">Recursos</a>
             <a href="#planos" className="hidden hover:text-brand md:inline">Planos</a>
-            <Link href="/login" className="hover:text-brand">Entrar</Link>
-            <Link href="/login" className="rounded-lg bg-brand px-4 py-2 text-white shadow-sm transition hover:bg-brand-dark">
+            <Link href={entrada} className="hover:text-brand">{user ? "SeuPMOC" : "Entrar"}</Link>
+            {!user && (            <Link href={entrada} className="rounded-lg bg-brand px-4 py-2 text-white shadow-sm transition hover:bg-brand-dark">
               Criar conta grátis
             </Link>
+            )}
           </nav>
         </div>
       </header>
@@ -109,14 +111,15 @@ export default async function Home() {
                 planilha anual de manutenção.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/login" className="rounded-lg bg-brand px-7 py-3.5 text-center font-semibold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-dark">
+                {!user && (                <Link href={entrada} className="rounded-lg bg-brand px-7 py-3.5 text-center font-semibold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-dark">
                   Começar grátis
                 </Link>
+                )}
                 <a href="#recursos" className="rounded-lg border border-brand/30 bg-white px-7 py-3.5 text-center font-semibold text-brand transition hover:border-brand">
                   Ver o que faz
                 </a>
               </div>
-              <p className="mt-4 text-sm text-slate-500">Plano grátis, sem cartão de crédito.</p>
+              {!user && <p className="mt-4 text-sm text-slate-500">Plano grátis, sem cartão de crédito.</p>}
             </div>
 
             {/* prévia da planilha */}
@@ -246,7 +249,7 @@ export default async function Home() {
                     ))}
                   </ul>
                   <Link
-                    href="/login"
+                    href={entrada}
                     className={`mt-6 block rounded-lg py-2.5 text-center text-sm font-semibold transition ${
                       destaque ? "bg-brand text-white hover:bg-brand-dark" : "border border-brand/30 text-brand hover:border-brand"
                     }`}
@@ -258,17 +261,17 @@ export default async function Home() {
             })}
           </div>
         </section>
-
         {/* CTA */}
-        <section className="px-5 pb-20">
+        {!user && (        <section className="px-5 pb-20">
           <div className="mx-auto max-w-6xl rounded-3xl bg-gradient-to-br from-brand to-brand-dark px-6 py-14 text-center text-white">
             <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Emita o primeiro PMOC hoje</h2>
             <p className="mx-auto mt-3 max-w-xl text-white/80">Crie a conta grátis e cadastre seu primeiro cliente em poucos minutos.</p>
-            <Link href="/login" className="mt-8 inline-block rounded-lg bg-white px-8 py-3.5 font-semibold text-brand shadow-lg transition hover:bg-brand-light">
+            <Link href={entrada} className="mt-8 inline-block rounded-lg bg-white px-8 py-3.5 font-semibold text-brand shadow-lg transition hover:bg-brand-light">
               Criar conta grátis
             </Link>
           </div>
         </section>
+        )}
       </main>
 
       <footer className="border-t border-brand/10 bg-brand-light/40 py-8 text-center text-sm text-slate-500">
