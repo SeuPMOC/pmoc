@@ -50,7 +50,7 @@ Após esse prazo, o SeuPMOC elimina os dados, salvo obrigação legal de guarda.
 
 O banco de dados fica em servidor próprio em Uberlândia/MG, Brasil. Há trânsito
 e/ou cópia fora do Brasil pelos sub-operadores Netlify, Cloudflare e Microsoft
-OneDrive (backup): indicar a base legal e as garantias de cada um.]
+OneDrive (backup). [Indicar a base legal e as garantias de cada um.]
 
 ## 7. Responsabilidade
 
