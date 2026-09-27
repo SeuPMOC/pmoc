@@ -22,13 +22,13 @@ export default async function PortalLayout({
   ];
 
   return (
-    <div className="min-h-screen">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-3">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-brand/10 bg-white/90 px-6 py-3 backdrop-blur">
         <div className="flex items-center gap-6">
           <span className="font-bold">Portal SeuPMOC</span>
           <nav className="flex gap-4 text-sm">
             {nav.map(([label, href]) => (
-              <Link key={href} href={href} className="text-neutral-600 hover:text-black">
+              <Link key={href} href={href} className="rounded-lg px-3 py-1.5 text-neutral-600 transition hover:bg-brand-light hover:text-brand">
                 {label}
               </Link>
             ))}

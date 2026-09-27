@@ -33,13 +33,13 @@ export default async function AppLayout({
   ];
 
   return (
-    <div className="min-h-screen">
-      <header className="flex items-center justify-between border-b px-6 py-3">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-brand/10 bg-white/90 px-6 py-3 backdrop-blur">
         <div className="flex items-center gap-6">
           <Image src="/logo.png" alt="SeuPMOC" width={640} height={220} className="h-8 w-auto" />
-          <nav className="flex gap-4 text-sm">
+          <nav className="flex gap-1 text-sm font-medium">
             {nav.map(([label, href]) => (
-              <Link key={href} href={href} className="text-neutral-600 hover:text-black">
+              <Link key={href} href={href} className="rounded-lg px-3 py-1.5 text-neutral-600 transition hover:bg-brand-light hover:text-brand">
                 {label}
               </Link>
             ))}
@@ -53,7 +53,7 @@ export default async function AppLayout({
           <BotaoSair />
         </div>
       </header>
-      <main className="p-6">{children}</main>
+      <main className="mx-auto max-w-6xl p-6">{children}</main>
     </div>
   );
 }

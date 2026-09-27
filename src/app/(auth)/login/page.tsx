@@ -72,7 +72,8 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 p-6">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-light via-white to-white p-4">
+    <main className="flex w-full max-w-sm flex-col gap-6 rounded-2xl border border-brand/10 bg-white p-8 shadow-2xl shadow-brand/10">
       <Link href="/" className="text-sm text-brand hover:underline">
         ← Voltar para a página principal
       </Link>
@@ -191,5 +192,6 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+    </div>
   );
 }

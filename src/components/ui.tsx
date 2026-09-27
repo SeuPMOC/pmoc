@@ -24,10 +24,10 @@ export function Field({
   const grupos = options?.some((o) => o.group)
     ? [...new Set(options.map((o) => o.group ?? ""))]
     : null;
-  const cls = "mt-1 w-full rounded border px-3 py-2 text-sm";
+  const cls = "mt-1 w-full px-3 py-2.5 text-sm";
   return (
     <label className="block text-sm">
-      <span className="text-neutral-600">{label}</span>
+      <span className="font-medium text-neutral-700">{label}</span>
       {as === "textarea" ? (
         <textarea
           name={name}
@@ -79,7 +79,7 @@ export function Field({
 
 export function Submit({ children = "Salvar" }: { children?: React.ReactNode }) {
   return (
-    <button className="rounded bg-brand px-4 py-2 text-sm text-white hover:opacity-90">
+    <button className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white">
       {children}
     </button>
   );
@@ -94,7 +94,7 @@ export function PageHeader({
 }) {
   return (
     <div className="mb-6 flex items-center justify-between">
-      <h1 className="text-xl font-bold">{title}</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight text-brand-dark">{title}</h1>
       {action}
     </div>
   );
@@ -108,9 +108,9 @@ export function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-lg border">
-      {title && <h2 className="border-b px-4 py-3 font-semibold">{title}</h2>}
-      <div className="p-4">{children}</div>
+    <section className="rounded-2xl border border-brand/10 bg-white shadow-sm">
+      {title && <h2 className="border-b border-brand/10 px-5 py-3.5 font-bold text-brand-dark">{title}</h2>}
+      <div className="p-5">{children}</div>
     </section>
   );
 }
