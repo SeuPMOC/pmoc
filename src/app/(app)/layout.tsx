@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
-import { sair } from "@/lib/sair";
+import { BotaoSair } from "@/components/botao-sair";
 import { isPlatformAdmin } from "@/lib/supabase/auth";
 
 export default async function AppLayout({
@@ -50,9 +50,7 @@ export default async function AppLayout({
             {(prof?.organizations as { name?: string } | null)?.name} ·{" "}
             {prof?.full_name ?? user.email}
           </span>
-          <form action={sair}>
-            <button className="rounded border px-3 py-1 text-neutral-600 hover:bg-neutral-50">Sair</button>
-          </form>
+          <BotaoSair />
         </div>
       </header>
       <main className="p-6">{children}</main>

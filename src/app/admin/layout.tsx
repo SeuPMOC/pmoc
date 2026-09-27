@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requirePlatformAdmin } from "@/lib/supabase/auth";
-import { sair } from "@/lib/sair";
+import { BotaoSair } from "@/components/botao-sair";
 
 export default async function AdminLayout({
   children,
@@ -24,9 +24,7 @@ export default async function AdminLayout({
           <Link href="/dashboard" className="text-neutral-500 hover:underline">
             ← voltar pro app
           </Link>
-          <form action={sair}>
-            <button className="rounded border px-3 py-1 text-neutral-600 hover:bg-neutral-50">Sair</button>
-          </form>
+          <BotaoSair />
         </div>
       </header>
       <main className="p-6">{children}</main>
