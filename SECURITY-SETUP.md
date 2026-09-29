@@ -21,14 +21,22 @@ sem ele, alguém cria conta com um e-mail que não é dele — inclusive um e-ma
 que esteja em `PLATFORM_ADMIN_EMAILS`. Contas criadas por
 `~/pmoc-criar-conta.sh` já nascem confirmadas (uso administrativo).
 
-## 2. SMTP — OBRIGATÓRIO para cadastro e reset de senha pelo site
+## 2. SMTP — configurado (Resend)
 
-Sem SMTP o GoTrue não envia e-mail nenhum. Preencher em `~/docker/.env`:
-`PMOC_SMTP_HOST`, `PMOC_SMTP_PORT`, `PMOC_SMTP_USER`, `PMOC_SMTP_PASS`,
-`PMOC_SMTP_FROM` e recriar o `pmoc-auth`. Use um provedor transacional (Resend,
-SES, Postmark) ou SMTP do provedor de e-mail do domínio (ex.: Proton pago com
-endereço `@seupmoc.com.br`). Configurar SPF/DKIM do domínio para não cair em spam.
-Templates em PT-BR: `GOTRUE_MAILER_TEMPLATES_*` / `GOTRUE_MAILER_SUBJECTS_*`.
+- Envio pelo **Resend** (plano grátis: 3.000/mês, 100/dia), remetente
+  `SeuPMOC <nao-responda@seupmoc.com.br>`. Variáveis `PMOC_SMTP_*` em
+  `~/docker/.env` (host `smtp.resend.com:587`, usuário `resend`, senha = chave
+  da API do Resend). Chave vazou/trocou: gerar outra no Resend, trocar
+  `PMOC_SMTP_PASS` e `docker compose up -d pmoc-auth`.
+- Domínio `seupmoc.com.br` verificado no Resend (região sa-east-1). DNS na
+  Netlify: TXT `resend._domainkey` (DKIM), CNAME `send` e `rsend` (SPF) e TXT
+  `_dmarc` (`p=none`). O MX de recebimento do Resend **não** foi criado.
+- Templates em PT-BR (confirmação, recuperação de senha, troca de e-mail) em
+  `~/docker/pmoc/email/*.html`, servidos pelo `pmoc_gateway` na porta interna
+  8080 (fora do túnel); assuntos em `GOTRUE_MAILER_SUBJECTS_*`. Depois de editar
+  um template: `docker restart pmoc_auth`.
+- Entregabilidade testada em 2026-09-29: e-mail de recuperação chegou na caixa
+  de entrada do Gmail.
 
 ## 3. CAPTCHA (Cloudflare Turnstile)
 
@@ -131,7 +139,7 @@ ser adicionado lá + `docker exec pmoc_gateway nginx -s reload`.
 ## Checklist de ativação
 
 - [x] Confirmação de e-mail ligada (autoconfirm desligado no GoTrue)
-- [ ] SMTP configurado (+ SPF/DKIM)
+- [x] SMTP configurado (Resend + DKIM/SPF/DMARC) e e-mails em PT-BR
 - [ ] Turnstile: site key na Netlify + secret no GoTrue + CSP liberada
 - [x] Rate limit de auth por IP real (`CF-Connecting-IP`)
 - [x] Backups criptografados (gpg AES-256) antes de irem para o OneDrive
